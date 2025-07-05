@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - ShopNest</title>
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/register.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-900 p-6">
+  <h1 class="text-xl font-semibold mb-4">Register</h1>
+  <form id="registerForm" class="space-y-4">
+    <input type="email" id="email" placeholder="Email" class="w-full border px-3 py-2" required />
+    <input type="password" id="password" placeholder="Password" class="w-full border px-3 py-2" required />
+    <button type="submit" class="w-full bg-blue-600 text-white py-2">Register</button>
+  </form>
+  <p class="text-sm mt-4">Already have an account? <a href="login.html" class="text-blue-600">Login</a></p>
+</body>
+</html>
