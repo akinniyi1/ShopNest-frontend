@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post Ad - ShopNest</title>
+  <script type="module" src="js/post-ad.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-900 p-6">
+  <h1 class="text-2xl font-semibold mb-4">Post New Ad</h1>
+  <form id="adForm" class="space-y-4">
+    <input type="text" id="title" placeholder="Product Title" class="w-full border px-3 py-2" required />
+    <textarea id="description" placeholder="Product Description" class="w-full border px-3 py-2" required></textarea>
+    <input type="number" id="price" placeholder="Price in USD" class="w-full border px-3 py-2" required />
+    <input type="text" id="location" placeholder="Location" class="w-full border px-3 py-2" required />
+    <select id="deliveryTime" class="w-full border px-3 py-2" required>
+      <option value="">Select Delivery Time</option>
+      <option value="7">7 Working Days</option>
+      <option value="14">14 Working Days</option>
+      <option value="30">30 Working Days</option>
+    </select>
+    <label class="block">Upload Product Images (1–5):</label>
+    <input type="file" id="images" accept="image/*" multiple class="w-full" />
+    <div id="preview" class="flex gap-2 flex-wrap mt-2"></div>
+    <button type="submit" class="w-full bg-blue-600 text-white py-2">Post Ad</button>
+  </form>
+</body>
+</html>
