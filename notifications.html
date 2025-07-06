@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notifications | ShopNest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-4 py-3 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
+    <div class="space-x-4 text-gray-600">
+      <a href="index.html" class="hover:text-indigo-500">Home</a>
+      <a href="dashboard.html" class="hover:text-indigo-500">Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- Notification Section -->
+  <section class="max-w-2xl mx-auto mt-6 bg-white shadow rounded-lg p-6">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">Notifications</h2>
+
+    <ul id="notifications" class="space-y-4">
+      <!-- JS will populate notifications here -->
+    </ul>
+  </section>
+
+  <script>
+    // Simulated notifications (in real app, this comes from backend)
+    const notifications = [
+      { message: "🎉 Your ad 'iPhone 13 Pro Max' has been approved", date: "Today" },
+      { message: "💬 New message from buyer: 'Is this still available?'", date: "2 hrs ago" },
+      { message: "⚠️ Your Premium Plan expires in 3 days", date: "Yesterday" }
+    ];
+
+    const container = document.getElementById("notifications");
+
+    notifications.forEach(n => {
+      const li = document.createElement("li");
+      li.className = "border-l-4 border-indigo-500 bg-indigo-50 p-4 rounded";
+      li.innerHTML = `
+        <p class="text-sm text-gray-700">${n.message}</p>
+        <p class="text-xs text-gray-400 mt-1">${n.date}</p>
+      `;
+      container.appendChild(li);
+    });
+  </script>
+</body>
+</html>
