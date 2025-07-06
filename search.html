@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search – ShopNest</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
+  <!-- Search bar -->
+  <div class="p-4 bg-white shadow">
+    <input
+      type="text"
+      placeholder="Search products, categories…"
+      class="w-full border rounded px-3 py-2 focus:outline-none"
+    />
+  </div>
+
+  <!-- Category icons -->
+  <div class="p-4 grid grid-cols-4 gap-3 bg-white">
+    <!-- Repeat for each category -->
+    <div class="flex flex-col items-center">
+      <div class="bg-blue-100 p-3 rounded-full">
+        🖥️
+      </div>
+      <span class="text-xs mt-1">Electronics</span>
+    </div>
+    <div class="flex flex-col items-center">
+      <div class="bg-green-100 p-3 rounded-full">
+        🚗
+      </div>
+      <span class="text-xs mt-1">Autos</span>
+    </div>
+    <div class="flex flex-col items-center">
+      <div class="bg-yellow-100 p-3 rounded-full">
+        🏠
+      </div>
+      <span class="text-xs mt-1">Real Estate</span>
+    </div>
+    <div class="flex flex-col items-center">
+      <div class="bg-pink-100 p-3 rounded-full">
+        👗
+      </div>
+      <span class="text-xs mt-1">Fashion</span>
+    </div>
+  </div>
+
+  <!-- Results grid -->
+  <div class="p-4 grid grid-cols-2 gap-4 flex-grow">
+    <!-- Single result card -->
+    <a href="product.html" class="block bg-white rounded shadow overflow-hidden">
+      <img src="https://via.placeholder.com/300" class="w-full h-32 object-cover" alt="Product">
+      <div class="p-2">
+        <h2 class="font-semibold text-sm">Sample Item</h2>
+        <p class="text-xs text-gray-500">7–14 days • $25.00</p>
+      </div>
+    </a>
+    <!-- Repeat cards... -->
+    <a href="product.html" class="block bg-white rounded shadow overflow-hidden">
+      <img src="https://via.placeholder.com/300" class="w-full h-32 object-cover" alt="Product">
+      <div class="p-2">
+        <h2 class="font-semibold text-sm">Another Item</h2>
+        <p class="text-xs text-gray-500">14–30 days • $75.00</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Bottom navigation -->
+  <nav class="bg-white border-t p-2 flex justify-around">
+    <a href="index.html" class="text-center text-gray-600">
+      🏠<br/><span class="text-xs">Home</span>
+    </a>
+    <a href="search.html" class="text-center text-blue-600">
+      🔍<br/><span class="text-xs">Search</span>
+    </a>
+    <a href="post-ad.html" class="text-center text-gray-600">
+      ➕<br/><span class="text-xs">Post</span>
+    </a>
+    <a href="dashboard.html" class="text-center text-gray-600">
+      📋<br/><span class="text-xs">My Ads</span>
+    </a>
+    <a href="profile.html" class="text-center text-gray-600">
+      👤<br/><span class="text-xs">Profile</span>
+    </a>
+  </nav>
+
+</body>
+</html>
