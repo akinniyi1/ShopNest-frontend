@@ -5,12 +5,6 @@ export function loadAds() {
   return data ? JSON.parse(data) : seedDummyAds();
 }
 
-export function addAd(ad) {
-  const ads = loadAds();
-  ads.push(ad);
-  localStorage.setItem("shopnest_ads", JSON.stringify(ads));
-}
-
 function seedDummyAds() {
   const dummy = [
     {
@@ -20,7 +14,7 @@ function seedDummyAds() {
       category: "Electronics",
       plan: "premium",
       deliveryTime: 7,
-      image: "https://via.placeholder.com/150"
+      image: "https://via.placeholder.com/300x200"
     },
     {
       title: "Trendy Apparel",
@@ -29,7 +23,7 @@ function seedDummyAds() {
       category: "Fashion",
       plan: "free",
       deliveryTime: 5,
-      image: "https://via.placeholder.com/150"
+      image: "https://via.placeholder.com/300x200"
     },
     {
       title: "3 Bedroom Villa",
@@ -38,7 +32,7 @@ function seedDummyAds() {
       category: "Real Estate",
       plan: "premium",
       deliveryTime: 14,
-      image: "https://via.placeholder.com/150"
+      image: "https://via.placeholder.com/300x200"
     },
     {
       title: "Wheel Loader",
@@ -47,15 +41,14 @@ function seedDummyAds() {
       category: "Machinery",
       plan: "premium",
       deliveryTime: 10,
-      image: "https://via.placeholder.com/150"
+      image: "https://via.placeholder.com/300x200"
     }
   ];
-
   localStorage.setItem("shopnest_ads", JSON.stringify(dummy));
   return dummy;
 }
 
-// Auto-render ads on homepage
+// Render ads
 const container = document.getElementById("adsContainer");
 if (container) {
   const ads = loadAds();
@@ -69,7 +62,6 @@ if (container) {
       <p class="text-indigo-600 font-semibold">₦${ad.price}</p>
       <p class="text-sm text-gray-500">${ad.location}</p>
     `;
-
     container.appendChild(div);
   });
 }
