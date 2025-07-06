@@ -1,4 +1,4 @@
-document.getElementById("images").addEventListener("change", function(event) {
+document.getElementById("images")?.addEventListener("change", function(event) {
   const preview = document.getElementById("preview");
   preview.innerHTML = "";
   const files = event.target.files;
@@ -19,7 +19,7 @@ document.getElementById("images").addEventListener("change", function(event) {
   });
 });
 
-document.getElementById("adForm").addEventListener("submit", function(e) {
+document.getElementById("adForm")?.addEventListener("submit", function(e) {
   e.preventDefault();
   alert("Ad posted! (Backend integration coming soon)");
 });
