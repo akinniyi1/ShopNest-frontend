@@ -1,1 +1,42 @@
-<!DOCTYPE html><html><head><title>Product</title></head><body><h1>Product Details</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Product Details | ShopNest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <nav class="bg-white shadow px-4 py-3 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
+    <a href="dashboard.html" class="text-indigo-500 hover:underline text-sm">Back to Dashboard</a>
+  </nav>
+
+  <section class="max-w-2xl mx-auto mt-6 bg-white shadow p-6 rounded-lg">
+    <h2 id="productTitle" class="text-2xl font-semibold text-gray-800 mb-2">Product Title</h2>
+    <p id="productPrice" class="text-lg text-indigo-600 mb-1">$0</p>
+    <p id="productLocation" class="text-sm text-gray-500 mb-1">Location</p>
+    <p id="productCategory" class="text-sm text-gray-500 mb-1">Category</p>
+    <p id="productDelivery" class="text-sm text-gray-400 mb-3">Delivery: X days</p>
+    <p class="text-sm text-gray-700">This is a static description for now. Dynamic descriptions can be added later.</p>
+  </section>
+
+  <script type="module">
+    import { loadAds } from './js/ads.js';
+
+    const params = new URLSearchParams(window.location.search);
+    const titleQuery = params.get("title");
+    const ad = loadAds().find(a => a.title === titleQuery);
+
+    if (ad) {
+      document.getElementById("productTitle").textContent = ad.title;
+      document.getElementById("productPrice").textContent = "$" + ad.price;
+      document.getElementById("productLocation").textContent = "📍 " + ad.location;
+      document.getElementById("productCategory").textContent = "Category: " + ad.category;
+      document.getElementById("productDelivery").textContent = "Delivery: " + ad.deliveryTime + " days";
+    } else {
+      document.querySelector("section").innerHTML = "<p class='text-center text-gray-500'>Product not found.</p>";
+    }
+  </script>
+</body>
+</html>
