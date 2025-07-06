@@ -1,18 +1,33 @@
+// post-ad.js
 import { addAd } from './ads.js';
-document.getElementById("adForm").addEventListener("submit", function(e) {
+
+document.getElementById("adForm").addEventListener("submit", function (e) {
   e.preventDefault();
-  const title = document.getElementById("title").value;
-  const price = document.getElementById("price").value;
-  const deliveryTime = document.getElementById("deliveryTime").value;
-  const files = document.getElementById("images").files;
-  const readers = Array.from(files).map(file => new Promise(res => {
-    const fr = new FileReader();
-    fr.onload = () => res(fr.result);
-    fr.readAsDataURL(file);
-  }));
-  Promise.all(readers).then(images => {
-    addAd({ title, price, deliveryTime, images });
-    alert("Ad posted!");
-    window.location.href = "dashboard.html";
-  });
+
+  const title = document.getElementById("title").value.trim();
+  const price = document.getElementById("price").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const category = document.getElementById("category").value;
+  const plan = document.getElementById("plan").value;
+  const deliveryTime = document.getElementById("deliveryTime").value.trim();
+  const errorBox = document.getElementById("formError");
+
+  if (!title || !price || !location || !category || !deliveryTime) {
+    errorBox.textContent = "Please fill in all required fields.";
+    errorBox.classList.remove("hidden");
+    return;
+  }
+
+  const ad = {
+    title,
+    price,
+    location,
+    category,
+    plan,
+    deliveryTime
+  };
+
+  addAd(ad);
+  alert("Ad posted!");
+  window.location.href = "dashboard.html";
 });
