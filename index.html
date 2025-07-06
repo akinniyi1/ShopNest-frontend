@@ -1,1 +1,39 @@
-<!DOCTYPE html><html><head><title>ShopNest - Home</title></head><body><h1>Welcome to ShopNest</h1><div id='homeAds'></div><script type='module'>import { renderAds } from './js/ads.js'; renderAds(document.getElementById('homeAds'));</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopNest — Global Marketplace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-4 py-3 flex items-center justify-between">
+    <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
+    <div class="space-x-4 text-gray-600">
+      <a href="dashboard.html" class="hover:text-indigo-500">Dashboard</a>
+      <a href="post-ad.html" class="hover:text-indigo-500">Post Ad</a>
+      <a href="profile.html" class="hover:text-indigo-500">Profile</a>
+    </div>
+  </nav>
+
+  <!-- Main Ads Section -->
+  <section class="p-4">
+    <h2 class="text-xl font-semibold mb-2 text-gray-700">Featured Products</h2>
+    <div id="homeAds" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+  </section>
+
+  <!-- Load Ads -->
+  <script type="module">
+    import { renderAds } from './js/ads.js';
+    renderAds(document.getElementById('homeAds'));
+  </script>
+</body>
+</html>
