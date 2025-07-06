@@ -1,35 +1,79 @@
-<form id="adForm" class="p-4 space-y-4">
-  <input id="title" class="w-full border p-2 rounded" placeholder="Title" />
-  <input id="price" type="number" class="w-full border p-2 rounded" placeholder="Price" />
-  <input id="location" class="w-full border p-2 rounded" placeholder="Location" />
-  <select id="category" class="w-full border p-2 rounded">
-    <option value="Electronics">Electronics</option>
-    <option value="Fashion">Fashion</option>
-    <option value="Automobile">Automobile</option>
-    <option value="Services">Services</option>
-  </select>
-  <select id="plan" class="w-full border p-2 rounded">
-    <option value="free">Free</option>
-    <option value="premium">Premium</option>
-  </select>
-  <input id="deliveryTime" type="number" class="w-full border p-2 rounded" placeholder="Delivery Time (days)" />
-  <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded">Post</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Post Ad | ShopNest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-4 py-3 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
+    <div class="space-x-4 text-gray-600">
+      <a href="index.html" class="hover:text-indigo-500">Home</a>
+      <a href="dashboard.html" class="hover:text-indigo-500">Dashboard</a>
+    </div>
+  </nav>
 
-<script type="module">
-  import { addAd } from './js/ads.js';
-  document.getElementById("adForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const ad = {
-      title: title.value,
-      price: price.value,
-      location: location.value,
-      category: category.value,
-      plan: plan.value,
-      deliveryTime: deliveryTime.value,
-    };
-    addAd(ad);
-    alert("Ad posted!");
-    window.location.href = "dashboard.html";
-  });
-</script>
+  <!-- Ad Posting Form -->
+  <form id="adForm" class="p-4 space-y-4 max-w-xl mx-auto bg-white shadow rounded-lg mt-6">
+    <h2 class="text-xl font-semibold text-gray-700">Post New Ad</h2>
+
+    <input id="title" class="w-full border p-2 rounded" placeholder="Ad Title" />
+    <input id="price" type="number" class="w-full border p-2 rounded" placeholder="Price (e.g. 1000)" />
+    <input id="location" class="w-full border p-2 rounded" placeholder="Location (e.g. Lagos)" />
+
+    <select id="category" class="w-full border p-2 rounded">
+      <option value="">Select Category</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Fashion">Fashion</option>
+      <option value="Automobile">Automobile</option>
+      <option value="Services">Services</option>
+    </select>
+
+    <select id="plan" class="w-full border p-2 rounded">
+      <option value="free">Free Plan</option>
+      <option value="premium">Premium Plan</option>
+    </select>
+
+    <input id="deliveryTime" type="number" class="w-full border p-2 rounded" placeholder="Delivery Time (days)" />
+
+    <div id="formError" class="text-red-600 text-sm hidden"></div>
+
+    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded w-full hover:bg-indigo-700">
+      Post Ad
+    </button>
+  </form>
+
+  <!-- JS Validation + Ad Submission -->
+  <script type="module">
+    import { addAd } from './js/ads.js';
+
+    const form = document.getElementById("adForm");
+    const errorBox = document.getElementById("formError");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const title = document.getElementById("title").value.trim();
+      const price = document.getElementById("price").value.trim();
+      const location = document.getElementById("location").value.trim();
+      const category = document.getElementById("category").value;
+      const plan = document.getElementById("plan").value;
+      const deliveryTime = document.getElementById("deliveryTime").value.trim();
+
+      if (!title || !price || !location || !category || !deliveryTime) {
+        errorBox.textContent = "Please fill in all required fields.";
+        errorBox.classList.remove("hidden");
+        return;
+      }
+
+      const ad = { title, price, location, category, plan, deliveryTime };
+      addAd(ad);
+      alert("Ad posted!");
+      window.location.href = "dashboard.html";
+    });
+  </script>
+</body>
+</html>
