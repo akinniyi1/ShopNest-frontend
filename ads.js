@@ -1,48 +1,73 @@
-export function loadAds() {
-  const raw = localStorage.getItem("shopnest_ads");
-  return raw ? JSON.parse(raw) : [];
-}
+// js/ads.js
 
-export function saveAds(ads) {
-  localStorage.setItem("shopnest_ads", JSON.stringify(ads));
+export function loadAds() {
+  const data = localStorage.getItem("shopnest_ads");
+  return data ? JSON.parse(data) : seedDummyAds();
 }
 
 export function addAd(ad) {
   const ads = loadAds();
-  ads.unshift(ad);
-  saveAds(ads);
+  ads.push(ad);
+  localStorage.setItem("shopnest_ads", JSON.stringify(ads));
 }
 
-export function renderAds(container, category = null, location = null) {
-  let ads = loadAds();
+function seedDummyAds() {
+  const dummy = [
+    {
+      title: "Laptop with SSD",
+      price: "200000",
+      location: "Lagos, Nigeria",
+      category: "Electronics",
+      plan: "premium",
+      deliveryTime: 7,
+      image: "https://via.placeholder.com/150"
+    },
+    {
+      title: "Trendy Apparel",
+      price: "120000",
+      location: "Abuja, Nigeria",
+      category: "Fashion",
+      plan: "free",
+      deliveryTime: 5,
+      image: "https://via.placeholder.com/150"
+    },
+    {
+      title: "3 Bedroom Villa",
+      price: "45000000",
+      location: "Port Harcourt, Nigeria",
+      category: "Real Estate",
+      plan: "premium",
+      deliveryTime: 14,
+      image: "https://via.placeholder.com/150"
+    },
+    {
+      title: "Wheel Loader",
+      price: "25000",
+      location: "Kano, Nigeria",
+      category: "Machinery",
+      plan: "premium",
+      deliveryTime: 10,
+      image: "https://via.placeholder.com/150"
+    }
+  ];
 
-  if (category) {
-    ads = ads.filter(ad => ad.category === category);
-  }
+  localStorage.setItem("shopnest_ads", JSON.stringify(dummy));
+  return dummy;
+}
 
-  if (location) {
-    const loc = location.toLowerCase();
-    ads = ads.filter(ad => ad.location?.toLowerCase().includes(loc));
-  }
-
-  container.innerHTML = ads.length === 0
-    ? "<p class='text-gray-500'>No ads found.</p>"
-    : "";
-
+// Auto-render ads on homepage
+const container = document.getElementById("adsContainer");
+if (container) {
+  const ads = loadAds();
   ads.forEach(ad => {
     const div = document.createElement("div");
-    div.className = "bg-white shadow rounded-lg p-4 relative";
+    div.className = "bg-white p-3 rounded shadow";
 
     div.innerHTML = `
-      ${ad.plan === "premium"
-        ? `<span class="absolute top-2 right-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded">Premium</span>`
-        : ""
-      }
-
-      <h3 class="text-lg font-semibold text-gray-800">${ad.title}</h3>
-      <p class="text-gray-600 font-medium">$${ad.price}</p>
-      <p class="text-sm text-gray-500 mb-1">📍 ${ad.location} • ${ad.category}</p>
-      <p class="text-sm text-gray-500">Delivery in ${ad.deliveryTime} days</p>
+      <img src="${ad.image}" alt="${ad.title}" class="rounded mb-2 w-full h-32 object-cover" />
+      <h3 class="font-medium text-gray-800">${ad.title}</h3>
+      <p class="text-indigo-600 font-semibold">₦${ad.price}</p>
+      <p class="text-sm text-gray-500">${ad.location}</p>
     `;
 
     container.appendChild(div);
