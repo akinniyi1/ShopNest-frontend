@@ -1,0 +1,59 @@
+<!-- order-history.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order History - ShopNest</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white p-4 shadow flex items-center justify-between">
+    <h1 class="text-lg font-bold text-purple-700">Your Orders</h1>
+    <a href="dashboard.html" class="text-sm text-gray-600">← Back to Dashboard</a>
+  </header>
+
+  <!-- Orders List -->
+  <main class="p-4 space-y-4" id="orders-list">
+    <!-- Dynamic orders will load here -->
+  </main>
+
+  <script>
+    const ordersList = document.getElementById("orders-list");
+
+    const orders = JSON.parse(localStorage.getItem("shopnest-orders") || "[]");
+
+    if (orders.length === 0) {
+      ordersList.innerHTML = "<p class='text-gray-500'>You have no orders yet.</p>";
+    } else {
+      orders.forEach(order => {
+        ordersList.innerHTML += `
+          <div class="bg-white p-4 rounded shadow flex gap-4 items-center">
+            <img src="${order.image || 'https://via.placeholder.com/80'}" class="w-20 h-20 rounded object-cover" />
+            <div class="flex-1">
+              <h2 class="font-bold">${order.title}</h2>
+              <p class="text-sm text-gray-500">${order.currency}${order.price} • Qty: ${order.quantity}</p>
+              <span class="inline-block mt-1 text-xs px-2 py-1 bg-${getStatusColor(order.status)}-100 text-${getStatusColor(order.status)}-600 rounded">
+                ${order.status}
+              </span>
+            </div>
+            <a href="track-order.html?id=${order.id}" class="text-sm text-purple-600 hover:underline">View</a>
+          </div>
+        `;
+      });
+    }
+
+    function getStatusColor(status) {
+      switch (status.toLowerCase()) {
+        case "pending": return "yellow";
+        case "shipped": return "blue";
+        case "delivered": return "green";
+        case "cancelled": return "red";
+        default: return "gray";
+      }
+    }
+  </script>
+</body>
+</html>
