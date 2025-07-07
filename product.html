@@ -1,111 +1,81 @@
-<!-- product.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Product Details - ShopNest</title>
+  <title>Browse Products - ShopNest</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-50 text-gray-800">
 
   <!-- Header -->
-  <header class="bg-white p-4 shadow flex items-center justify-between">
-    <a href="products.html" class="text-sm text-gray-600">← Back</a>
-    <h1 class="text-lg font-bold text-purple-700">Product Details</h1>
-    <div></div>
+  <header class="bg-white shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-purple-700">ShopNest Marketplace</h1>
+      <p id="category-title" class="text-sm text-gray-600">Loading category...</p>
+    </div>
+    <a href="index.html" class="mt-2 md:mt-0 text-sm text-blue-600 hover:underline">← Back to Home</a>
   </header>
 
-  <!-- Product Section -->
-  <main id="product-details" class="p-4 space-y-4"></main>
-
-  <!-- Review Section -->
-  <section class="mt-4 px-4" id="review-area" style="display: none;">
-    <h2 class="text-lg font-bold mb-2">Leave a Review</h2>
-    <div class="flex gap-1 text-yellow-400 text-xl mb-2" id="rating-stars"></div>
-    <textarea id="review-text" rows="3" placeholder="Write your review..." class="w-full border rounded p-2"></textarea>
-    <button onclick="submitReview()" class="mt-2 bg-purple-600 text-white px-4 py-2 rounded">Submit Review</button>
-
-    <div class="mt-6">
-      <h3 class="text-lg font-semibold mb-1">Reviews</h3>
-      <div id="review-list" class="space-y-2"></div>
-    </div>
+  <!-- Info Banner -->
+  <section class="bg-purple-50 text-purple-800 text-sm p-3 px-5">
+    Browse products by category or explore all available items. Click any product to view details or contact the seller.
   </section>
 
+  <!-- Products Grid -->
+  <main class="p-4 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="product-list">
+    <!-- Products will be injected here -->
+  </main>
+
+  <!-- Fallback Section -->
+  <section id="empty-state" class="hidden text-center mt-20">
+    <h2 class="text-lg font-semibold text-gray-600">No products found</h2>
+    <p class="text-sm text-gray-500 mt-1">Try a different category or come back later.</p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mt-20 bg-white border-t p-4 text-center text-sm text-gray-500">
+    &copy; 2025 ShopNest. All rights reserved.
+  </footer>
+
   <script>
-    const id = new URLSearchParams(window.location.search).get("id");
-    const product = (JSON.parse(localStorage.getItem("shopnest-ads")) || []).find(p => p.id == id);
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedCategory = urlParams.get("category");
 
-    if (!product) {
-      document.getElementById("product-details").innerHTML = "<p>Product not found.</p>";
-    } else {
-      document.getElementById("product-details").innerHTML = `
-        <img src="${product.imagePreviews?.[0]}" class="w-full h-56 object-cover rounded" />
-        <h2 class="text-xl font-bold mt-2">${product.title}</h2>
-        <p class="text-gray-600">${product.currency}${product.price}</p>
-        <p class="text-sm text-gray-500 mt-2">${product.description}</p>
-        <div class="mt-2 text-sm text-gray-700">
-          <strong>Category:</strong> ${product.category} <br/>
-          <strong>Delivery To:</strong> ${product.deliveryTo?.join(", ")} <br/>
-        </div>
-        <button class="bg-green-600 text-white px-4 py-2 mt-4 rounded">Add to Cart</button>
-        <button class="ml-2 bg-indigo-600 text-white px-4 py-2 rounded">Chat with Seller</button>
-      `;
+      const ads = JSON.parse(localStorage.getItem("shopnest-ads") || "[]");
+      const filteredAds = selectedCategory
+        ? ads.filter(ad => ad.category === selectedCategory)
+        : ads;
 
-      // Show review section if "logged in"
-      document.getElementById("review-area").style.display = "block";
-    }
+      const productList = document.getElementById("product-list");
+      const categoryTitle = document.getElementById("category-title");
+      const emptyState = document.getElementById("empty-state");
 
-    // ⭐ Review logic
-    const starsDiv = document.getElementById("rating-stars");
-    let currentRating = 0;
+      categoryTitle.textContent = selectedCategory
+        ? `Showing category: ${selectedCategory}`
+        : "Showing all categories";
 
-    for (let i = 1; i <= 5; i++) {
-      const star = document.createElement("span");
-      star.textContent = "★";
-      star.classList.add("cursor-pointer");
-      star.onclick = () => {
-        currentRating = i;
-        updateStars();
-      };
-      starsDiv.appendChild(star);
-    }
-
-    function updateStars() {
-      [...starsDiv.children].forEach((star, i) => {
-        star.style.color = i < currentRating ? "#facc15" : "#d1d5db";
-      });
-    }
-
-    function submitReview() {
-      const text = document.getElementById("review-text").value.trim();
-      if (!currentRating || !text) return alert("Rating & review required");
-
-      const all = JSON.parse(localStorage.getItem("shopnest-reviews") || "[]");
-      all.push({ productId: id, user: "You", rating: currentRating, text, date: new Date().toLocaleDateString() });
-      localStorage.setItem("shopnest-reviews", JSON.stringify(all));
-      currentRating = 0;
-      document.getElementById("review-text").value = "";
-      updateStars();
-      loadReviews();
-    }
-
-    function loadReviews() {
-      const reviewList = document.getElementById("review-list");
-      const all = JSON.parse(localStorage.getItem("shopnest-reviews") || "[]");
-      const match = all.filter(r => r.productId == id);
-      reviewList.innerHTML = match.map(r => `
-        <div class="bg-white border rounded p-2">
-          <div class="flex justify-between text-sm mb-1">
-            <span>${r.user}</span><span>${r.date}</span>
-          </div>
-          <div class="text-yellow-400 text-sm mb-1">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-          <p class="text-sm">${r.text}</p>
-        </div>
-      `).join("");
-    }
-
-    loadReviews();
+      if (filteredAds.length === 0) {
+        productList.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+      } else {
+        productList.innerHTML = filteredAds.map(ad => `
+          <a href="product.html?id=${ad.id}" class="bg-white shadow-sm hover:shadow-md rounded overflow-hidden border transition duration-200">
+            <img src="${ad.imagePreviews?.[0] || 'placeholder.jpg'}" class="w-full h-44 object-cover" alt="${ad.title}" />
+            <div class="p-3">
+              <h3 class="text-md font-semibold text-gray-800 truncate">${ad.title}</h3>
+              <p class="text-sm text-gray-500 mt-1">${ad.currency}${ad.price}</p>
+              <span class="inline-block mt-2 text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded">${ad.category}</span>
+              <div class="mt-2">
+                <p class="text-xs text-gray-400">Delivery to: ${ad.deliveryTo?.join(", ") || "N/A"}</p>
+              </div>
+            </div>
+          </a>
+        `).join("");
+      }
+    });
   </script>
+
 </body>
 </html>
