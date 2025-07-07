@@ -61,7 +61,7 @@
     </select>
 
     <!-- Image Upload -->
-    <input type="file" id="image" accept="image/*" class="w-full border p-2 rounded" />
+    <input type="file" id="images" accept="image/*" multiple class="w-full border p-2 rounded" />
 
     <!-- Description -->
     <textarea id="description" placeholder="Product Description" class="w-full border p-2 rounded h-28"></textarea>
@@ -88,6 +88,119 @@
     </button>
   </main>
 
-  <script type="module" src="./js/post-ad.js"></script>
+  <script>
+    const categorySelect = document.getElementById('category');
+    const categoryFieldsDiv = document.getElementById('category-fields');
+
+    const extraFields = {
+      "Fashion": [
+        { id: "color", label: "Color" },
+        { id: "size", label: "Size" },
+        { id: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Unisex"] }
+      ],
+      "Electronics": [
+        { id: "brand", label: "Brand" },
+        { id: "condition", label: "Condition", type: "select", options: ["New", "Used", "Refurbished"] },
+        { id: "warranty", label: "Warranty Period" }
+      ],
+      "Vehicles": [
+        { id: "model", label: "Model" },
+        { id: "mileage", label: "Mileage" },
+        { id: "transmission", label: "Transmission", type: "select", options: ["Manual", "Automatic"] },
+        { id: "fuel", label: "Fuel Type", type: "select", options: ["Petrol", "Diesel", "Electric"] }
+      ],
+      "Real Estate": [
+        { id: "propertyType", label: "Property Type", type: "select", options: ["House", "Flat", "Land", "Shop"] },
+        { id: "location", label: "Location" },
+        { id: "bedrooms", label: "Bedrooms" },
+        { id: "bathrooms", label: "Bathrooms" }
+      ],
+      // Add more categories as needed
+    };
+
+    categorySelect.addEventListener('change', () => {
+      const selected = categorySelect.value;
+      categoryFieldsDiv.innerHTML = '';
+
+      if (extraFields[selected]) {
+        extraFields[selected].forEach(field => {
+          if (field.type === "select") {
+            const select = document.createElement("select");
+            select.id = field.id;
+            select.className = "w-full border p-2 rounded";
+            field.options.forEach(opt => {
+              const o = document.createElement("option");
+              o.value = o.textContent = opt;
+              select.appendChild(o);
+            });
+            categoryFieldsDiv.appendChild(labelElement(field.label));
+            categoryFieldsDiv.appendChild(select);
+          } else {
+            const input = document.createElement("input");
+            input.type = "text";
+            input.id = field.id;
+            input.placeholder = field.label;
+            input.className = "w-full border p-2 rounded";
+            categoryFieldsDiv.appendChild(input);
+          }
+        });
+      }
+    });
+
+    function labelElement(text) {
+      const label = document.createElement("label");
+      label.textContent = text;
+      label.className = "block mt-2";
+      return label;
+    }
+
+    async function submitAd() {
+      const formData = new FormData();
+      formData.append("title", document.getElementById("title").value);
+      formData.append("price", document.getElementById("price").value);
+      formData.append("currency", document.getElementById("currency").value);
+      formData.append("category", document.getElementById("category").value);
+      formData.append("description", document.getElementById("description").value);
+      formData.append("deliveryTime", document.getElementById("delivery-time").value);
+      formData.append("deliveryCountries", document.getElementById("delivery-countries").value);
+
+      // Extra category fields
+      const selected = categorySelect.value;
+      if (extraFields[selected]) {
+        extraFields[selected].forEach(field => {
+          const value = document.getElementById(field.id)?.value;
+          if (value) {
+            formData.append(field.id, value);
+          }
+        });
+      }
+
+      // Handle images
+      const images = document.getElementById("images").files;
+      if (images.length > 5) {
+        return alert("You can only upload up to 5 images.");
+      }
+      [...images].forEach((file, i) => {
+        formData.append("images", file);
+      });
+
+      try {
+        const res = await fetch("https://your-backend-api.onrender.com/api/post-ad", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert("Ad submitted successfully!");
+          window.location.href = "products.html";
+        } else {
+          alert(result.message || "Something went wrong.");
+        }
+      } catch (err) {
+        alert("Error connecting to server.");
+      }
+    }
+  </script>
 </body>
 </html>
