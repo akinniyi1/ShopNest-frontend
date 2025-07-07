@@ -1,93 +1,110 @@
 // js/post-ad.js
 
-const categorySelect = document.getElementById("category");
-const categoryFields = document.getElementById("category-fields");
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  const categorySelect = document.getElementById("category");
+  const extraFields = document.getElementById("extra-fields");
+  const imageInput = document.getElementById("images");
+  const imagePreview = document.getElementById("image-preview");
 
-categorySelect.addEventListener("change", () => {
-  const selected = categorySelect.value;
-  categoryFields.innerHTML = "";
+  // 🖼️ Image preview for max 5
+  imageInput.addEventListener("change", () => {
+    imagePreview.innerHTML = "";
+    [...imageInput.files].slice(0, 5).forEach(file => {
+      const img = document.createElement("img");
+      img.className = "w-20 h-20 object-cover rounded border";
+      img.src = URL.createObjectURL(file);
+      imagePreview.appendChild(img);
+    });
+  });
 
-  if (selected === "Fashion") {
-    categoryFields.innerHTML += `
-      <input type="text" placeholder="Brand" class="w-full border p-2 rounded" id="fashion-brand" />
-      <select id="fashion-gender" class="w-full border p-2 rounded">
-        <option disabled selected>Select Gender</option>
-        <option>Men</option>
-        <option>Women</option>
-        <option>Unisex</option>
-      </select>
-      <input type="text" placeholder="Available Sizes (e.g. S, M, L)" class="w-full border p-2 rounded" id="fashion-sizes" />
-      <input type="number" placeholder="Discount (%)" class="w-full border p-2 rounded" id="fashion-discount" />
-    `;
-  }
+  // 🎯 Show sub-fields based on selected category
+  categorySelect.addEventListener("change", () => {
+    const cat = categorySelect.value;
+    extraFields.innerHTML = "";
 
-  if (selected === "Real Estate") {
-    categoryFields.innerHTML += `
-      <input type="number" placeholder="No. of Bedrooms" class="w-full border p-2 rounded" id="bedrooms" />
-      <input type="text" placeholder="Location (City)" class="w-full border p-2 rounded" id="realestate-location" />
-      <select id="furnished" class="w-full border p-2 rounded">
-        <option disabled selected>Furnished?</option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    `;
-  }
+    if (cat === "Fashion") {
+      extraFields.innerHTML = `
+        <input placeholder="Brand" class="w-full border p-2 rounded" />
+        <input placeholder="Size (e.g. M, L, XL)" class="w-full border p-2 rounded" />
+        <input placeholder="Color" class="w-full border p-2 rounded" />
+        <select class="w-full border p-2 rounded">
+          <option disabled selected>Gender</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Unisex</option>
+        </select>
+      `;
+    } else if (cat === "Electronics") {
+      extraFields.innerHTML = `
+        <input placeholder="Brand" class="w-full border p-2 rounded" />
+        <input placeholder="Model" class="w-full border p-2 rounded" />
+        <input placeholder="Warranty (e.g. 1 Year)" class="w-full border p-2 rounded" />
+      `;
+    } else if (cat === "Real Estate") {
+      extraFields.innerHTML = `
+        <input placeholder="Property Type (e.g. Apartment, Office)" class="w-full border p-2 rounded" />
+        <input placeholder="No. of Rooms" class="w-full border p-2 rounded" />
+        <select class="w-full border p-2 rounded">
+          <option disabled selected>Furnishing</option>
+          <option>Furnished</option>
+          <option>Semi-Furnished</option>
+          <option>Unfurnished</option>
+        </select>
+      `;
+    }
+  });
 
-  if (selected === "Electronics") {
-    categoryFields.innerHTML += `
-      <input type="text" placeholder="Brand" class="w-full border p-2 rounded" id="electronic-brand" />
-      <select id="warranty" class="w-full border p-2 rounded">
-        <option disabled selected>Warranty?</option>
-        <option>Yes</option>
-        <option>No</option>
-      </select>
-    `;
-  }
+  // 📝 Handle form submit
+  form.addEventListener("submit", e => {
+    e.preventDefault();
 
-  // Add more if needed...
+    const title = document.getElementById("title").value.trim();
+    const price = parseFloat(document.getElementById("price").value.trim());
+    const currency = document.getElementById("currency").value;
+    const category = categorySelect.value;
+    const description = document.getElementById("description").value.trim();
+    const delivery = [...document.getElementById("delivery").selectedOptions].map(opt => opt.value);
+    const images = imageInput.files;
+
+    // 🚀 Grab sub-fields
+    const extraInputs = [...extraFields.querySelectorAll("input, select")];
+    const extraDetails = {};
+    extraInputs.forEach(input => {
+      if (input.value) {
+        const key = input.placeholder || input.name || input.id;
+        extraDetails[key] = input.value;
+      }
+    });
+
+    // ✨ Process up to 5 image previews (URLs)
+    const imagePreviews = [];
+    [...images].slice(0, 5).forEach(file => {
+      const url = URL.createObjectURL(file);
+      imagePreviews.push(url);
+    });
+
+    // 🛍️ Build ad object
+    const newAd = {
+      id: Date.now(),
+      title,
+      price,
+      currency,
+      category,
+      description,
+      deliveryTo: delivery,
+      extraDetails,
+      imagePreviews,
+      seller: "Current User", // later pull from login
+      datePosted: new Date().toISOString()
+    };
+
+    // 💾 Save ad to localStorage
+    const ads = JSON.parse(localStorage.getItem("shopnest-ads") || "[]");
+    ads.push(newAd);
+    localStorage.setItem("shopnest-ads", JSON.stringify(ads));
+
+    alert("Ad posted successfully!");
+    window.location.href = "dashboard.html";
+  });
 });
-
-window.submitAd = function () {
-  const ad = {
-    title: document.getElementById("title").value,
-    price: document.getElementById("price").value,
-    currency: document.getElementById("currency").value,
-    category: categorySelect.value,
-    description: document.getElementById("description").value,
-    deliveryTime: document.getElementById("delivery-time").value,
-    deliveryCountries: document.getElementById("delivery-countries").value,
-    image: "", // Will be replaced when backend is added
-    extras: {},
-    createdAt: new Date().toISOString()
-  };
-
-  // Category-specific data
-  switch (ad.category) {
-    case "Fashion":
-      ad.extras.brand = document.getElementById("fashion-brand")?.value;
-      ad.extras.gender = document.getElementById("fashion-gender")?.value;
-      ad.extras.sizes = document.getElementById("fashion-sizes")?.value;
-      ad.extras.discount = document.getElementById("fashion-discount")?.value;
-      break;
-
-    case "Real Estate":
-      ad.extras.bedrooms = document.getElementById("bedrooms")?.value;
-      ad.extras.location = document.getElementById("realestate-location")?.value;
-      ad.extras.furnished = document.getElementById("furnished")?.value;
-      break;
-
-    case "Electronics":
-      ad.extras.brand = document.getElementById("electronic-brand")?.value;
-      ad.extras.warranty = document.getElementById("warranty")?.value;
-      break;
-  }
-
-  // Basic validation
-  if (!ad.title || !ad.price || !ad.category || !ad.description) {
-    alert("Please fill all required fields.");
-    return;
-  }
-
-  console.log("Ad prepared:", ad);
-  alert("Ad submitted! (Simulated, will connect to backend soon)");
-};
