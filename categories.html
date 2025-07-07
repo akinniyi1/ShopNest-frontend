@@ -1,45 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>ShopNest - Categories</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Categories - ShopNest</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .category-card {
+      @apply flex flex-col items-center justify-center p-4 border rounded-lg shadow bg-white hover:bg-purple-50 cursor-pointer transition;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 p-4">
-  <h1 class="text-xl font-bold text-indigo-600 mb-4">All Categories</h1>
+<body class="bg-gray-50">
 
-  <div class="grid grid-cols-2 gap-4 text-center">
-    <div>📱 Electronics</div>
-    <div>👗 Fashion</div>
-    <div>🏠 Real Estate</div>
-    <div>🚜 Machinery</div>
-    <div>🚗 Cars</div>
-    <div>📞 Phones</div>
-    <div>🛋 Furniture</div>
-    <div>💼 Jobs</div>
-    <div>📦 Industrial</div>
-    <div>🍴 Food</div>
-    <div>🎓 Education</div>
-    <div>🐄 Agriculture</div>
-    <div>🧰 Tools</div>
-    <div>🧴 Health</div>
-    <div>📚 Books</div>
-    <div>🧳 Travel</div>
-    <div>🖥 Gadgets</div>
-    <div>🧸 Toys</div>
-    <div>🎮 Gaming</div>
-    <div>🎤 Events</div>
-    <div>🏢 Office</div>
-    <div>🖼 Art</div>
-    <div>🧼 Cleaning</div>
-    <div>🎵 Music</div>
-    <div>🚴‍♂️ Sports</div>
-    <div>🧑‍🍳 Services</div>
-    <div>👶 Baby Products</div>
-    <div>🐕 Pets</div>
-    <div>🚿 Bathroom</div>
-    <div>🛏 Bedroom</div>
-  </div>
+  <!-- Header -->
+  <header class="p-4 bg-white shadow-md flex justify-between items-center">
+    <h1 class="text-xl font-bold text-purple-700">ShopNest</h1>
+    <a href="index.html" class="text-sm text-gray-600">Home</a>
+  </header>
+
+  <!-- Main -->
+  <main class="p-4">
+    <h2 class="text-lg font-semibold mb-4">Explore Categories</h2>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <!-- Loop Through These in JS Later -->
+      <div onclick="goToCategory('Fashion')" class="category-card">
+        👗<p>Fashion</p>
+      </div>
+      <div onclick="goToCategory('Electronics')" class="category-card">
+        📱<p>Electronics</p>
+      </div>
+      <div onclick="goToCategory('Real Estate')" class="category-card">
+        🏠<p>Real Estate</p>
+      </div>
+      <div onclick="goToCategory('Vehicles')" class="category-card">
+        🚗<p>Vehicles</p>
+      </div>
+      <div onclick="goToCategory('Machinery')" class="category-card">
+        🏭<p>Machinery</p>
+      </div>
+      <div onclick="goToCategory('Beauty')" class="category-card">
+        💄<p>Beauty</p>
+      </div>
+      <div onclick="goToCategory('Food')" class="category-card">
+        🍱<p>Food</p>
+      </div>
+      <div onclick="goToCategory('Agriculture')" class="category-card">
+        🌾<p>Agriculture</p>
+      </div>
+      <div onclick="goToCategory('Furniture')" class="category-card">
+        🛋️<p>Furniture</p>
+      </div>
+      <div onclick="goToCategory('Pets')" class="category-card">
+        🐾<p>Pets</p>
+      </div>
+      <div onclick="goToCategory('Books')" class="category-card">
+        📚<p>Books</p>
+      </div>
+      <div onclick="goToCategory('Toys')" class="category-card">
+        🧸<p>Toys</p>
+      </div>
+      <div onclick="goToCategory('Gaming')" class="category-card">
+        🎮<p>Gaming</p>
+      </div>
+      <div onclick="goToCategory('Health')" class="category-card">
+        💊<p>Health</p>
+      </div>
+      <div onclick="goToCategory('Bags')" class="category-card">
+        🎒<p>Bags</p>
+      </div>
+      <div onclick="goToCategory('Shoes')" class="category-card">
+        👟<p>Shoes</p>
+      </div>
+      <div onclick="goToCategory('Cameras')" class="category-card">
+        📷<p>Cameras</p>
+      </div>
+      <div onclick="goToCategory('Computers')" class="category-card">
+        💻<p>Computers</p>
+      </div>
+      <div onclick="goToCategory('Sports')" class="category-card">
+        ⚽<p>Sports</p>
+      </div>
+      <div onclick="goToCategory('Baby Products')" class="category-card">
+        👶<p>Baby Products</p>
+      </div>
+      <div onclick="goToCategory('Construction')" class="category-card">
+        🚧<p>Construction</p>
+      </div>
+      <div onclick="goToCategory('Watches')" class="category-card">
+        ⌚<p>Watches</p>
+      </div>
+      <div onclick="goToCategory('Stationery')" class="category-card">
+        ✏️<p>Stationery</p>
+      </div>
+      <div onclick="goToCategory('Industrial Equipment')" class="category-card">
+        🧱<p>Industrial</p>
+      </div>
+      <div onclick="goToCategory('Phones & Tablets')" class="category-card">
+        📞<p>Phones & Tablets</p>
+      </div>
+      <div onclick="goToCategory('Others')" class="category-card">
+        🗃️<p>Others</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function goToCategory(category) {
+      window.location.href = `product-list.html?category=${encodeURIComponent(category)}`;
+    }
+  </script>
 </body>
 </html>
