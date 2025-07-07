@@ -2,76 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Post Ad | ShopNest</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Post Ad - ShopNest</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-sans">
-  <!-- Navbar -->
-  <nav class="bg-white shadow px-4 py-3 flex justify-between items-center">
-    <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
-    <div class="space-x-4 text-gray-600">
-      <a href="index.html" class="hover:text-indigo-500">Home</a>
-      <a href="dashboard.html" class="hover:text-indigo-500">Dashboard</a>
+<body class="bg-gray-50 text-gray-900">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-white shadow">
+    <h1 class="text-xl font-bold text-purple-700">ShopNest</h1>
+    <a href="help.html" class="text-sm text-gray-600">Help Center</a>
+  </header>
+
+  <main class="p-4 space-y-4">
+    <h2 class="text-lg font-semibold mb-2">Post Your Product</h2>
+
+    <!-- Title -->
+    <input type="text" id="title" placeholder="Product Title" class="w-full border p-2 rounded" />
+
+    <!-- Price & Currency -->
+    <div class="flex space-x-2">
+      <input type="number" id="price" placeholder="Price" class="flex-1 border p-2 rounded" />
+      <select id="currency" class="border p-2 rounded">
+        <option value="₦">₦ NGN</option>
+        <option value="$">$ USD</option>
+      </select>
     </div>
-  </nav>
 
-  <!-- Ad Posting Form -->
-  <form id="adForm" class="p-4 space-y-4 max-w-xl mx-auto bg-white shadow rounded-lg mt-6">
-    <h2 class="text-xl font-semibold text-gray-700">Post New Ad</h2>
-
-    <input id="title" class="w-full border p-2 rounded" placeholder="Ad Title" />
-    <input id="price" type="number" class="w-full border p-2 rounded" placeholder="Price (e.g. 1000)" />
-    <input id="location" class="w-full border p-2 rounded" placeholder="Location (e.g. Lagos)" />
-
+    <!-- Category Dropdown -->
     <select id="category" class="w-full border p-2 rounded">
-      <option value="">Select Category</option>
-      <option value="Electronics">Electronics</option>
+      <option disabled selected>Select Category</option>
       <option value="Fashion">Fashion</option>
-      <option value="Automobile">Automobile</option>
-      <option value="Services">Services</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Real Estate">Real Estate</option>
+      <option value="Machinery">Machinery</option>
+      <option value="Phones & Tablets">Phones & Tablets</option>
+      <option value="Vehicles">Vehicles</option>
+      <option value="Beauty">Beauty</option>
+      <option value="Baby Products">Baby Products</option>
+      <option value="Sports">Sports</option>
+      <option value="Agriculture">Agriculture</option>
+      <option value="Food">Food</option>
+      <option value="Furniture">Furniture</option>
+      <option value="Toys">Toys</option>
+      <option value="Pets">Pets</option>
+      <option value="Books">Books</option>
+      <option value="Construction">Construction</option>
+      <option value="Health">Health</option>
+      <option value="Stationery">Stationery</option>
+      <option value="Gaming">Gaming</option>
+      <option value="Watches">Watches</option>
+      <option value="Bags">Bags</option>
+      <option value="Shoes">Shoes</option>
+      <option value="Computers">Computers</option>
+      <option value="Cameras">Cameras</option>
+      <option value="Industrial">Industrial Equipment</option>
+      <option value="Others">Others</option>
     </select>
 
-    <select id="plan" class="w-full border p-2 rounded">
-      <option value="free">Free Plan</option>
-      <option value="premium">Premium Plan</option>
+    <!-- Image Upload -->
+    <input type="file" id="image" accept="image/*" class="w-full border p-2 rounded" />
+
+    <!-- Description -->
+    <textarea id="description" placeholder="Product Description" class="w-full border p-2 rounded h-28"></textarea>
+
+    <!-- Dynamic Fields (based on category) -->
+    <div id="category-fields" class="space-y-2"></div>
+
+    <!-- Delivery Time -->
+    <label class="block">Delivery Time (days)</label>
+    <select id="delivery-time" class="w-full border p-2 rounded">
+      <option value="3">3 Days</option>
+      <option value="7">7 Days</option>
+      <option value="14">14 Days</option>
+      <option value="30">30 Days</option>
     </select>
 
-    <input id="deliveryTime" type="number" class="w-full border p-2 rounded" placeholder="Delivery Time (days)" />
+    <!-- Delivery Countries -->
+    <label class="block mt-2">Deliverable Countries</label>
+    <textarea id="delivery-countries" placeholder="e.g. Nigeria, Ghana, Kenya" class="w-full border p-2 rounded h-20"></textarea>
 
-    <!-- 🖼️ Image upload + preview -->
-    <div>
-      <label class="block text-sm text-gray-600 mb-1">Upload Product Image</label>
-      <input id="imageUpload" type="file" accept="image/*" class="w-full border p-2 rounded" />
-      <img id="imagePreview" class="mt-3 rounded max-h-48 hidden" />
-    </div>
-
-    <div id="formError" class="text-red-600 text-sm hidden"></div>
-
-    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded w-full hover:bg-indigo-700">
-      Post Ad
+    <!-- Submit Button -->
+    <button onclick="submitAd()" class="w-full bg-purple-700 text-white py-2 rounded mt-4 hover:bg-purple-800">
+      Submit Ad
     </button>
-  </form>
+  </main>
 
-  <!-- JS module -->
   <script type="module" src="./js/post-ad.js"></script>
-
-  <!-- Image preview logic -->
-  <script>
-    const imageUpload = document.getElementById("imageUpload");
-    const preview = document.getElementById("imagePreview");
-
-    imageUpload.addEventListener("change", function () {
-      const file = this.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          preview.src = e.target.result;
-          preview.classList.remove("hidden");
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  </script>
 </body>
 </html>
