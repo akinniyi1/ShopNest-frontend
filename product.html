@@ -2,41 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Product Details | ShopNest</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product - ShopNest</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-sans">
-  <nav class="bg-white shadow px-4 py-3 flex justify-between items-center">
-    <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
-    <a href="dashboard.html" class="text-indigo-500 hover:underline text-sm">Back to Dashboard</a>
-  </nav>
+<body class="bg-gray-50 text-gray-900">
 
-  <section class="max-w-2xl mx-auto mt-6 bg-white shadow p-6 rounded-lg">
-    <h2 id="productTitle" class="text-2xl font-semibold text-gray-800 mb-2">Product Title</h2>
-    <p id="productPrice" class="text-lg text-indigo-600 mb-1">$0</p>
-    <p id="productLocation" class="text-sm text-gray-500 mb-1">Location</p>
-    <p id="productCategory" class="text-sm text-gray-500 mb-1">Category</p>
-    <p id="productDelivery" class="text-sm text-gray-400 mb-3">Delivery: X days</p>
-    <p class="text-sm text-gray-700">This is a static description for now. Dynamic descriptions can be added later.</p>
-  </section>
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-white shadow">
+    <h1 class="text-xl font-bold text-purple-700">ShopNest</h1>
+    <a href="index.html" class="text-sm text-gray-600">🏠 Home</a>
+  </header>
 
-  <script type="module">
-    import { loadAds } from './js/ads.js';
+  <main class="p-4 space-y-4">
+    <div id="product-details" class="bg-white p-4 rounded shadow">
+      <!-- Product Info will load here -->
+    </div>
 
-    const params = new URLSearchParams(window.location.search);
-    const titleQuery = params.get("title");
-    const ad = loadAds().find(a => a.title === titleQuery);
+    <!-- Reviews -->
+    <div class="bg-white p-4 rounded shadow">
+      <h2 class="text-lg font-semibold">Reviews</h2>
+      <div id="reviews" class="mt-2 space-y-2 text-sm text-gray-700"></div>
 
-    if (ad) {
-      document.getElementById("productTitle").textContent = ad.title;
-      document.getElementById("productPrice").textContent = "$" + ad.price;
-      document.getElementById("productLocation").textContent = "📍 " + ad.location;
-      document.getElementById("productCategory").textContent = "Category: " + ad.category;
-      document.getElementById("productDelivery").textContent = "Delivery: " + ad.deliveryTime + " days";
-    } else {
-      document.querySelector("section").innerHTML = "<p class='text-center text-gray-500'>Product not found.</p>";
+      <!-- Add Review (simulate login check) -->
+      <div class="mt-4">
+        <textarea id="review-text" placeholder="Leave a review..." class="w-full border p-2 rounded"></textarea>
+        <button onclick="submitReview()" class="mt-2 bg-purple-700 text-white px-4 py-1 rounded">Submit Review</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const userCountry = "Nigeria"; // Simulated from register info
+
+    const product = {
+      id: "item123",
+      title: "Smart Watch S10",
+      price: 120,
+      currency: "$",
+      seller: "TechZone Store",
+      description: "Waterproof smart watch with heart rate monitor.",
+      deliveryCountries: ["USA", "UK", "Nigeria"],
+      reviews: [
+        { user: "Fatima", comment: "Great product!" },
+        { user: "John", comment: "Fast delivery, thanks." }
+      ]
+    };
+
+    function loadProduct() {
+      const container = document.getElementById("product-details");
+
+      // Region restriction
+      if (!product.deliveryCountries.includes(userCountry)) {
+        container.innerHTML = `<p class="text-red-600 font-semibold">This item cannot be delivered to your country (${userCountry}).</p>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <h2 class="text-xl font-bold">${product.title}</h2>
+        <p class="text-purple-700 font-semibold">${product.currency}${product.price}</p>
+        <p class="text-gray-700">${product.description}</p>
+        <p class="text-sm mt-2">Seller: <strong>${product.seller}</strong></p>
+
+        <div class="mt-4 flex gap-2">
+          <button class="bg-green-600 text-white px-4 py-2 rounded">Buy Now</button>
+          <button class="bg-yellow-500 text-white px-4 py-2 rounded">Add to Cart</button>
+        </div>
+      `;
+
+      const reviewList = document.getElementById("reviews");
+      product.reviews.forEach(r => {
+        const item = document.createElement("p");
+        item.innerText = `• ${r.user}: ${r.comment}`;
+        reviewList.appendChild(item);
+      });
     }
+
+    function submitReview() {
+      const text = document.getElementById("review-text").value.trim();
+      if (!text) return alert("Enter a review first");
+
+      // Simulate user "James"
+      const reviewList = document.getElementById("reviews");
+      const newItem = document.createElement("p");
+      newItem.innerText = `• James: ${text}`;
+      reviewList.appendChild(newItem);
+      document.getElementById("review-text").value = "";
+    }
+
+    loadProduct();
   </script>
 </body>
 </html>
