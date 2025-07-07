@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shopping Cart - ShopNest</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-white shadow">
+    <h1 class="text-xl font-bold text-purple-700">ShopNest</h1>
+    <a href="index.html" class="text-sm text-gray-600">🏠 Home</a>
+  </header>
+
+  <!-- Cart Section -->
+  <main class="p-4 space-y-4">
+    <h2 class="text-lg font-semibold">Your Cart</h2>
+    <div id="cart-items" class="space-y-4"></div>
+
+    <div id="cart-summary" class="text-right mt-6"></div>
+
+    <button onclick="checkout()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+      Checkout
+    </button>
+  </main>
+
+  <script>
+    const cartItems = JSON.parse(localStorage.getItem("shopnest-cart") || "[]");
+
+    function renderCart() {
+      const container = document.getElementById("cart-items");
+      container.innerHTML = "";
+
+      if (cartItems.length === 0) {
+        container.innerHTML = "<p class='text-gray-500'>Your cart is empty.</p>";
+        return;
+      }
+
+      cartItems.forEach((item, index) => {
+        container.innerHTML += `
+          <div class="bg-white shadow p-4 rounded flex gap-4 items-center">
+            <img src="${item.image || 'https://via.placeholder.com/80'}" alt="Product" class="w-20 h-20 object-cover rounded">
+            <div class="flex-1">
+              <p class="font-semibold">${item.title}</p>
+              <p class="text-sm text-gray-600">Seller: ${item.seller}</p>
+              <p class="text-purple-700">${item.currency}${item.price}</p>
+              <div class="flex items-center mt-1 space-x-2">
+                <button onclick="decreaseQty(${index})" class="px-2 bg-gray-200 rounded">–</button>
+                <span>${item.quantity}</span>
+                <button onclick="increaseQty(${index})" class="px-2 bg-gray-200 rounded">+</button>
+              </div>
+            </div>
+            <button onclick="removeItem(${index})" class="text-red-600 text-sm">🗑️</button>
+          </div>
+        `;
+      });
+
+      updateTotal();
+    }
+
+    function increaseQty(index) {
+      cartItems[index].quantity++;
+      saveCart();
+    }
+
+    function decreaseQty(index) {
+      if (cartItems[index].quantity > 1) {
+        cartItems[index].quantity--;
+        saveCart();
+      }
+    }
+
+    function removeItem(index) {
+      cartItems.splice(index, 1);
+      saveCart();
+    }
+
+    function saveCart() {
+      localStorage.setItem("shopnest-cart", JSON.stringify(cartItems));
+      renderCart();
+    }
+
+    function updateTotal() {
+      const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      document.getElementById("cart-summary").innerHTML = `
+        <p class="text-lg font-semibold">Total: <span class="text-purple-700">$${total.toFixed(2)}</span></p>
+      `;
+    }
+
+    function checkout() {
+      alert("Checkout coming soon 🔒 (to be connected to backend)");
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>
