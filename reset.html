@@ -2,17 +2,70 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Reset Password — ShopNest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reset Password - ShopNest</title>
-  <script type="module" src="js/firebase-config.js"></script>
-  <script type="module" src="js/reset.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-white text-gray-900 p-6">
-  <h1 class="text-xl font-semibold mb-4">Reset Password</h1>
-  <form id="resetForm" class="space-y-4">
-    <input type="email" id="resetEmail" placeholder="Email" class="w-full border px-3 py-2" required />
-    <button type="submit" class="w-full bg-yellow-600 text-white py-2">Send Reset Link</button>
-  </form>
+<body class="bg-gray-100 font-sans">
+
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="bg-white p-6 rounded shadow-md w-full max-w-sm text-center">
+      <h2 class="text-2xl font-bold text-indigo-700 mb-4">Reset Your Password</h2>
+
+      <input type="email" id="resetEmail" placeholder="Enter your email address"
+        class="w-full border px-3 py-2 rounded mb-3" />
+
+      <button id="resetBtn"
+        class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+        Reset Password
+      </button>
+
+      <p id="resetMessage" class="text-sm mt-4 text-gray-600"></p>
+      <a href="index.html" class="text-indigo-600 text-sm block mt-4">← Back to Login</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBx_2_7aqxU5z6sLbbBp0fpdJvOzjarmGE",
+      authDomain: "shopnest-4cbdf.firebaseapp.com",
+      projectId: "shopnest-4cbdf",
+      storageBucket: "shopnest-4cbdf.firebasestorage.app",
+      messagingSenderId: "106375353281",
+      appId: "1:106375353281:web:cc6d19ddbef840e5715540",
+      measurementId: "G-FJ5TFZD45F"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const resetBtn = document.getElementById("resetBtn");
+    const resetEmail = document.getElementById("resetEmail");
+    const resetMessage = document.getElementById("resetMessage");
+
+    resetBtn.onclick = async () => {
+      const email = resetEmail.value.trim();
+      if (!email) {
+        resetMessage.textContent = "Please enter your email address.";
+        return;
+      }
+
+      resetBtn.textContent = "Sending...";
+      resetBtn.disabled = true;
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        resetMessage.textContent = "Password reset link sent to your email.";
+      } catch (err) {
+        resetMessage.textContent = "Error: " + (err.message || "Something went wrong.");
+      }
+
+      resetBtn.textContent = "Reset Password";
+      resetBtn.disabled = false;
+    };
+  </script>
 </body>
 </html>
