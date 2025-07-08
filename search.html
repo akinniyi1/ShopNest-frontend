@@ -18,13 +18,64 @@
 
   <!-- Filters -->
   <section class="p-4 bg-white shadow mb-4">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <select id="filterCategory" class="border p-2 rounded w-full">
         <option value="">All Categories</option>
-        <option value="Electronics">Electronics</option>
         <option value="Fashion">Fashion</option>
+        <option value="Electronics">Electronics</option>
         <option value="Automobile">Automobile</option>
         <option value="Services">Services</option>
+        <option value="Phones & Tablets">Phones & Tablets</option>
+        <option value="Computing">Computing</option>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Home & Furniture">Home & Furniture</option>
+        <option value="Health & Beauty">Health & Beauty</option>
+        <option value="Baby, Kids & Toys">Baby, Kids & Toys</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Sports & Outdoors">Sports & Outdoors</option>
+        <option value="Groceries">Groceries</option>
+        <option value="Books & Media">Books & Media</option>
+        <option value="Pet Supplies">Pet Supplies</option>
+        <option value="Agriculture">Agriculture</option>
+        <option value="Industrial Equipment">Industrial Equipment</option>
+        <option value="Musical Instruments">Musical Instruments</option>
+        <option value="Watches & Jewelry">Watches & Jewelry</option>
+        <option value="Security & Surveillance">Security & Surveillance</option>
+        <option value="Food & Drink">Food & Drink</option>
+        <option value="Office Equipment">Office Equipment</option>
+        <option value="Power & Energy">Power & Energy</option>
+        <option value="Travel & Luggage">Travel & Luggage</option>
+        <option value="Arts & Crafts">Arts & Crafts</option>
+        <option value="Tickets & Events">Tickets & Events</option>
+        <option value="Education">Education</option>
+        <option value="Machinery">Machinery</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <select id="filterCountry" class="border p-2 rounded w-full">
+        <option value="">All Countries</option>
+        <option value="Nigeria">Nigeria</option>
+        <option value="Ghana">Ghana</option>
+        <option value="Kenya">Kenya</option>
+        <option value="South Africa">South Africa</option>
+        <option value="Egypt">Egypt</option>
+        <option value="Morocco">Morocco</option>
+        <option value="USA">United States</option>
+        <option value="Canada">Canada</option>
+        <option value="UK">United Kingdom</option>
+        <option value="Germany">Germany</option>
+        <option value="France">France</option>
+        <option value="India">India</option>
+        <option value="China">China</option>
+        <option value="Brazil">Brazil</option>
+        <option value="Australia">Australia</option>
+        <option value="Mexico">Mexico</option>
+        <option value="Turkey">Turkey</option>
+        <option value="Italy">Italy</option>
+        <option value="Spain">Spain</option>
+        <option value="UAE">United Arab Emirates</option>
+        <option value="Russia">Russia</option>
+        <option value="Ukraine">Ukraine</option>
       </select>
 
       <input id="filterLocation" class="border p-2 rounded w-full" placeholder="Location (e.g. Lagos)" />
@@ -45,14 +96,24 @@
     const searchResults = document.getElementById('searchResults');
     const filterCategory = document.getElementById('filterCategory');
     const filterLocation = document.getElementById('filterLocation');
+    const filterCountry = document.getElementById('filterCountry');
 
     document.getElementById('applyFilters').addEventListener("click", () => {
       const category = filterCategory.value.trim();
-      const location = filterLocation.value.trim().toLowerCase();
-      renderAds(searchResults, category || null, location || null);
+      const country = filterCountry.value.trim();
+      const location = filterLocation.value.trim();
+
+      // Navigate to products.html with filters in query
+      const query = new URLSearchParams({
+        ...(category && { category }),
+        ...(country && { country }),
+        ...(location && { location })
+      }).toString();
+
+      window.location.href = `products.html?${query}`;
     });
 
-    // Load all by default
+    // Optional: renderAds() can still show full list here if needed
     renderAds(searchResults);
   </script>
 </body>
