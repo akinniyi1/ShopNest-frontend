@@ -53,9 +53,8 @@
   </div>
 </section>
 
-<!-- 🌍 Main Content (hidden by default) -->
+<!-- 🌍 Main Content -->
 <div id="mainContent" class="hidden">
-
   <!-- Top Bar -->
   <div class="flex justify-between items-center px-4 py-3 bg-white shadow">
     <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
@@ -134,7 +133,8 @@
     createUserWithEmailAndPassword,
     sendEmailVerification,
     signInWithEmailAndPassword,
-    signOut
+    signOut,
+    onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -193,11 +193,16 @@
           authMessage.textContent = "Please verify your email first.";
           await signOut(auth);
         } else {
-          await fetch("https://your-backend.com/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, country })
-          });
+          try {
+            await fetch("https://your-backend.com/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, country })
+            });
+          } catch (fetchErr) {
+            console.warn("Fetch failed (non-blocking):", fetchErr);
+          }
+
           authSection.classList.add("hidden");
           mainContent.classList.remove("hidden");
           import('./js/ads.js');
@@ -222,10 +227,17 @@
   logoutBtn.onclick = async () => {
     btnText.textContent = "Logging out...";
     await signOut(auth);
-    setTimeout(() => {
-      location.reload();
-    }, 800); // ⏳ brief delay before reloading
+    setTimeout(() => location.reload(), 700);
   };
+
+  // Initial Auth State — shows content if already signed in and verified
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.emailVerified) {
+      authSection.classList.add("hidden");
+      mainContent.classList.remove("hidden");
+      import('./js/ads.js');
+    }
+  });
 </script>
 </body>
 </html>
