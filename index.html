@@ -131,7 +131,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   import {
     getAuth,
-    onAuthStateChanged,
     createUserWithEmailAndPassword,
     sendEmailVerification,
     signInWithEmailAndPassword,
@@ -164,7 +163,6 @@
 
   let registerMode = false;
 
-  // Toggle Mode
   registerToggle.onclick = () => {
     registerMode = !registerMode;
     btnText.textContent = registerMode ? "Register" : "Login";
@@ -172,7 +170,6 @@
     authCountry.classList.toggle("hidden", !registerMode);
   };
 
-  // Auth Handler
   loginBtn.onclick = async () => {
     const email = authEmail.value.trim();
     const password = authPassword.value.trim();
@@ -196,12 +193,14 @@
           authMessage.textContent = "Please verify your email first.";
           await signOut(auth);
         } else {
-          // Send user to backend
           await fetch("https://your-backend.com/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, country })
           });
+          authSection.classList.add("hidden");
+          mainContent.classList.remove("hidden");
+          import('./js/ads.js');
         }
       }
     } catch (err) {
@@ -209,6 +208,8 @@
         authMessage.textContent = "Account already exists. Please login.";
       } else if (err.code === "auth/invalid-credential") {
         authMessage.textContent = "Incorrect email or password. Please try again or create an account.";
+      } else if (err.code === "auth/weak-password") {
+        authMessage.textContent = "Password should be at least 6 characters";
       } else {
         authMessage.textContent = err.message;
       }
@@ -221,19 +222,10 @@
   logoutBtn.onclick = async () => {
     btnText.textContent = "Logging out...";
     await signOut(auth);
-    location.reload();
+    setTimeout(() => {
+      location.reload();
+    }, 800); // ⏳ brief delay before reloading
   };
-
-  onAuthStateChanged(auth, user => {
-    if (user && user.emailVerified) {
-      authSection.classList.add("hidden");
-      mainContent.classList.remove("hidden");
-      import('./js/ads.js');
-    } else {
-      authSection.classList.remove("hidden");
-      mainContent.classList.add("hidden");
-    }
-  });
 </script>
 </body>
 </html>
