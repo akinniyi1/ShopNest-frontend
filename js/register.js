@@ -3,50 +3,76 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import { firebaseConfig } from "./firebase-config.js";
+// Initialize Firebase (or import from firebase-config.js if you prefer)
+const firebaseConfig = {
+  apiKey: "AIzaSyBx_2_7aqxU5z6sLbbBp0fpdJvOzjarmGE",
+  authDomain: "shopnest-4cbdf.firebaseapp.com",
+  projectId: "shopnest-4cbdf",
+  storageBucket: "shopnest-4cbdf.firebasestorage.app",
+  messagingSenderId: "106375353281",
+  appId: "1:106375353281:web:cc6d19ddbef840e5715540",
+  measurementId: "G-FJ5TFZD45F"
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+// Elements
+const form = document.getElementById("registerForm");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const countrySelect = document.getElementById("country");
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const country = document.getElementById("country").value;
+// Create error display
+const errorMessage = document.createElement("p");
+errorMessage.className = "text-red-600 text-sm mt-2 text-center";
+form.appendChild(errorMessage);
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+  const country = countrySelect.value;
 
   if (!email || !password || !country) {
-    alert("All fields are required.");
+    errorMessage.textContent = "Please fill all fields.";
     return;
   }
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await sendEmailVerification(userCredential.user);
+  const submitBtn = form.querySelector("button[type='submit']");
+  submitBtn.textContent = "Registering...";
+  submitBtn.disabled = true;
+  errorMessage.textContent = "";
 
-    // Send user info to Render backend
-    const res = await fetch("https://your-render-backend-url.com/register", {
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    await sendEmailVerification(userCred.user);
+
+    // Optional: send email + country to backend
+    await fetch("https://your-backend.com/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        uid: userCredential.user.uid,
-        email,
-        country
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, country })
     });
 
-    const data = await res.json();
-
-    if (res.ok) {
-      alert("Registration successful! Please check your email to verify your account.");
+    alert("A verification link has been sent to your email.");
+    await signOut(auth); // Sign out until email is verified
+    window.location.href = "login.html";
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      errorMessage.textContent = "Account already exists. Please login.";
+    } else if (err.code === "auth/weak-password") {
+      errorMessage.textContent = "Password should be at least 6 characters.";
+    } else if (err.code === "auth/invalid-email") {
+      errorMessage.textContent = "Please enter a valid email address.";
     } else {
-      alert("Registered but failed to save data: " + data.error);
+      errorMessage.textContent = "Error: " + (err.message || "Something went wrong.");
     }
-  } catch (error) {
-    alert(error.message);
   }
+
+  submitBtn.textContent = "Register";
+  submitBtn.disabled = false;
 });
