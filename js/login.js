@@ -44,10 +44,23 @@ form.addEventListener("submit", async (e) => {
 
   try {
     const userCred = await signInWithEmailAndPassword(auth, email, password);
+
     if (!userCred.user.emailVerified) {
       await signOut(auth);
       errorMessage.textContent = "Please verify your email before logging in.";
     } else {
+      // ✅ Get user info from backend
+      const res = await fetch(`https://shopnest-backend-43fu.onrender.com/api/users/${email}`);
+      const userData = await res.json();
+
+      if (!res.ok || !userData.email) {
+        throw new Error("Could not fetch user data from backend.");
+      }
+
+      // Store user data in localStorage for use across pages
+      localStorage.setItem("shopnestUser", JSON.stringify(userData));
+
+      // Redirect to homepage
       window.location.href = "index.html";
     }
   } catch (err) {
