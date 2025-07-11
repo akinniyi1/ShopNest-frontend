@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordInput = document.getElementById("password");
   const countrySelect = document.getElementById("country");
 
-  // Create error display
+  // Error display
   const errorMessage = document.createElement("p");
   errorMessage.className = "text-red-600 text-sm mt-2 text-center";
   form.appendChild(errorMessage);
@@ -50,12 +50,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
       await sendEmailVerification(userCred.user);
 
-      // Optional: send email + country to backend
-      await fetch("https://your-backend.com/register", {
+      // ✅ Send registration info to backend
+      const response = await fetch("https://shopnest-backend-43fu.onrender.com/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, country })
+        body: JSON.stringify({ email, country, name: email.split('@')[0] }) // default name from email
       });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Backend registration failed.");
+      }
 
       alert("A verification link has been sent to your email.");
       await signOut(auth);
