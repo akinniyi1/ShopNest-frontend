@@ -58,6 +58,9 @@
         <option value="Other">Other</option>
       </select>
 
+      <!-- Feedback message -->
+      <p id="statusMsg" class="text-center text-sm mt-2"></p>
+
       <button type="submit" class="bg-indigo-600 text-white py-2 px-4 rounded w-full hover:bg-indigo-700">
         Save Changes
       </button>
@@ -73,16 +76,27 @@
     const locationInput = document.getElementById("location");
     const deliveryInput = document.getElementById("deliveryTime");
     const categoryInput = document.getElementById("category");
+    const statusMsg = document.getElementById("statusMsg");
+
+    const backendURL = "https://shopnest-backend-43fu.onrender.com";
 
     async function loadAdData() {
-      if (!adId) return alert("Invalid ad ID");
+      if (!adId) {
+        statusMsg.textContent = "Invalid ad ID.";
+        statusMsg.className = "text-red-600 text-center";
+        return;
+      }
 
       try {
-        const res = await fetch("https://your-render-backend-url.com/ads.json");
+        const res = await fetch(`${backendURL}/ads.json`);
         const ads = await res.json();
         const ad = ads.find(a => a.id === adId);
 
-        if (!ad) return alert("Ad not found");
+        if (!ad) {
+          statusMsg.textContent = "Ad not found.";
+          statusMsg.className = "text-red-600 text-center";
+          return;
+        }
 
         titleInput.value = ad.title;
         priceInput.value = ad.price;
@@ -90,13 +104,16 @@
         deliveryInput.value = ad.deliveryTime;
         categoryInput.value = ad.category;
       } catch (err) {
-        alert("Error loading ad data");
+        statusMsg.textContent = "Error loading ad data.";
+        statusMsg.className = "text-red-600 text-center";
         console.error(err);
       }
     }
 
     document.getElementById("editAdForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      statusMsg.textContent = "";
+      statusMsg.className = "";
 
       const updatedAd = {
         id: adId,
@@ -108,23 +125,25 @@
       };
 
       try {
-        const res = await fetch(`https://your-render-backend-url.com/edit-ad/${adId}`, {
+        const res = await fetch(`${backendURL}/edit-ad/${adId}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedAd)
         });
 
+        const result = await res.json();
         if (res.ok) {
-          alert("Ad updated successfully!");
-          window.location.href = "dashboard.html";
+          statusMsg.textContent = "✅ Ad updated successfully!";
+          statusMsg.className = "text-green-600 text-center";
+          setTimeout(() => window.location.href = "dashboard.html", 1000);
         } else {
-          alert("Failed to update ad.");
+          statusMsg.textContent = result.error || "❌ Failed to update ad.";
+          statusMsg.className = "text-red-600 text-center";
         }
       } catch (err) {
         console.error(err);
-        alert("An error occurred while updating the ad.");
+        statusMsg.textContent = "❌ An error occurred while updating the ad.";
+        statusMsg.className = "text-red-600 text-center";
       }
     });
 
