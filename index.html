@@ -9,7 +9,7 @@
 <body class="bg-gray-100 font-sans">
 
 <!-- 🌍 Main Content -->
-<div id="mainContent" class="hidden">
+<div id="mainContent">
   <!-- Top Bar -->
   <div class="flex justify-between items-center px-4 py-3 bg-white shadow">
     <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
@@ -21,7 +21,7 @@
 
   <!-- Search -->
   <div class="px-4 mt-2">
-    <input type="text" placeholder="Search..." class="w-full p-2 border rounded mb-4" />
+    <input id="searchInput" type="text" placeholder="Search ads by title or category..." class="w-full p-2 border rounded mb-4" />
   </div>
 
   <!-- Categories -->
@@ -53,6 +53,13 @@
   <div class="px-4 mt-4 mb-20">
     <h2 class="text-lg font-semibold mb-2">Featured Products</h2>
     <div id="adsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center items-center gap-4 mt-6">
+      <button id="prevPage" class="px-4 py-2 bg-gray-300 text-sm rounded">Previous</button>
+      <span id="pageInfo" class="text-sm"></span>
+      <button id="nextPage" class="px-4 py-2 bg-gray-300 text-sm rounded">Next</button>
+    </div>
   </div>
 
   <!-- Bottom Nav -->
@@ -80,7 +87,8 @@
   </nav>
 </div>
 
-<!-- 🔐 Firebase Auth Check -->
+<!-- 🔐 Firebase Auth + Script -->
 <script type="module" src="js/index.js"></script>
+<script type="module" src="js/ads.js"></script>
 </body>
 </html>
