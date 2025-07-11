@@ -66,7 +66,7 @@
     <!-- Description -->
     <textarea id="description" placeholder="Product Description" class="w-full border p-2 rounded h-28"></textarea>
 
-    <!-- Dynamic Fields (based on category) -->
+    <!-- Dynamic Fields -->
     <div id="category-fields" class="space-y-2"></div>
 
     <!-- Delivery Time -->
@@ -86,11 +86,15 @@
     <button onclick="submitAd()" class="w-full bg-purple-700 text-white py-2 rounded mt-4 hover:bg-purple-800">
       Submit Ad
     </button>
+
+    <!-- 🟡 Status Message -->
+    <p id="statusMessage" class="text-center text-sm mt-4"></p>
   </main>
 
   <script>
     const categorySelect = document.getElementById('category');
     const categoryFieldsDiv = document.getElementById('category-fields');
+    const messageBox = document.getElementById('statusMessage');
 
     const extraFields = {
       "Fashion": [
@@ -114,8 +118,7 @@
         { id: "location", label: "Location" },
         { id: "bedrooms", label: "Bedrooms" },
         { id: "bathrooms", label: "Bathrooms" }
-      ],
-      // Add more categories as needed
+      ]
     };
 
     categorySelect.addEventListener('change', () => {
@@ -155,6 +158,9 @@
     }
 
     async function submitAd() {
+      messageBox.textContent = "";
+      messageBox.className = "";
+
       const formData = new FormData();
       formData.append("title", document.getElementById("title").value);
       formData.append("price", document.getElementById("price").value);
@@ -164,7 +170,6 @@
       formData.append("deliveryTime", document.getElementById("delivery-time").value);
       formData.append("deliveryCountries", document.getElementById("delivery-countries").value);
 
-      // Extra category fields
       const selected = categorySelect.value;
       if (extraFields[selected]) {
         extraFields[selected].forEach(field => {
@@ -175,30 +180,32 @@
         });
       }
 
-      // Handle images
       const images = document.getElementById("images").files;
       if (images.length > 5) {
-        return alert("You can only upload up to 5 images.");
+        messageBox.textContent = "⚠️ You can only upload up to 5 images.";
+        messageBox.className = "text-red-600 text-center mt-2";
+        return;
       }
-      [...images].forEach((file, i) => {
-        formData.append("images", file);
-      });
+      [...images].forEach((file) => formData.append("images", file));
 
       try {
-        const res = await fetch("https://your-backend-api.onrender.com/api/post-ad", {
+        const res = await fetch("https://shopnest-backend-43fu.onrender.com/api/post-ad", {
           method: "POST",
           body: formData,
         });
 
         const result = await res.json();
         if (res.ok) {
-          alert("Ad submitted successfully!");
-          window.location.href = "products.html";
+          messageBox.textContent = "✅ Ad submitted successfully!";
+          messageBox.className = "text-green-600 text-center mt-2";
+          setTimeout(() => window.location.href = "dashboard.html", 1000);
         } else {
-          alert(result.message || "Something went wrong.");
+          messageBox.textContent = result.message || "❌ Something went wrong.";
+          messageBox.className = "text-red-600 text-center mt-2";
         }
       } catch (err) {
-        alert("Error connecting to server.");
+        messageBox.textContent = "❌ Error connecting to server.";
+        messageBox.className = "text-red-600 text-center mt-2";
       }
     }
   </script>
