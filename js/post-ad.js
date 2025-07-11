@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const extraFields = document.getElementById("extra-fields");
   const imageInput = document.getElementById("images");
   const imagePreview = document.getElementById("image-preview");
+  const messageBox = document.getElementById("statusMessage");
 
   const backendURL = "https://shopnest-backend-43fu.onrender.com";
 
@@ -58,10 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // 📝 Handle form submit
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    messageBox.textContent = "";
+    messageBox.className = "";
 
     const user = JSON.parse(localStorage.getItem("shopnestUser"));
     if (!user || !user.email) {
-      alert("Please login first.");
+      messageBox.textContent = "Please login first.";
+      messageBox.className = "text-red-600 text-center mt-3";
       return;
     }
 
@@ -82,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 🔃 Convert images to Base64 (for now)
+    // 🔃 Convert images to Base64
     const imageBase64List = await Promise.all(
       images.map(file => toBase64(file))
     );
@@ -109,13 +113,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
       if (res.ok) {
-        alert("Ad posted successfully!");
-        window.location.href = "dashboard.html";
+        messageBox.textContent = "✅ Ad posted successfully!";
+        messageBox.className = "text-green-600 text-center mt-3";
+        form.reset();
+        imagePreview.innerHTML = "";
       } else {
-        alert(data.error || "Failed to post ad.");
+        messageBox.textContent = data.error || "Failed to post ad.";
+        messageBox.className = "text-red-600 text-center mt-3";
       }
     } catch (err) {
-      alert("Server error. Try again.");
+      messageBox.textContent = "Server error. Please try again.";
+      messageBox.className = "text-red-600 text-center mt-3";
     }
   });
 
