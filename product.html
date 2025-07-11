@@ -22,6 +22,18 @@
     Browse products by category or explore all available items. Click any product to view details or contact the seller.
   </section>
 
+  <!-- Filter and Pagination -->
+  <section class="flex justify-between items-center px-4 mt-3">
+    <select id="categoryFilter" class="border p-2 rounded text-sm">
+      <option value="">All Categories</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Fashion">Fashion</option>
+      <option value="Real Estate">Real Estate</option>
+      <option value="Machinery">Machinery</option>
+    </select>
+    <div id="pagination" class="space-x-2 text-sm"></div>
+  </section>
+
   <!-- Products Grid -->
   <main class="p-4 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="product-list">
     <!-- Products will be injected here -->
@@ -39,43 +51,103 @@
   </footer>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    const API_URL = 'https://shopnest-backend-43fu.onrender.com/api/ads';
+    const ITEMS_PER_PAGE = 8;
+    let allAds = [];
+    let filteredAds = [];
+    let currentPage = 1;
+
+    async function fetchAds() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        allAds = data.reverse(); // Latest first
+        applyFilters();
+      } catch (err) {
+        document.getElementById("product-list").innerHTML = "<p>Error loading ads.</p>";
+      }
+    }
+
+    function applyFilters() {
       const urlParams = new URLSearchParams(window.location.search);
-      const selectedCategory = urlParams.get("category");
+      const selectedCategory = urlParams.get("category") || document.getElementById("categoryFilter").value;
 
-      const ads = JSON.parse(localStorage.getItem("shopnest-ads") || "[]");
-      const filteredAds = selectedCategory
-        ? ads.filter(ad => ad.category === selectedCategory)
-        : ads;
+      filteredAds = selectedCategory
+        ? allAds.filter(ad => ad.category === selectedCategory)
+        : allAds;
 
-      const productList = document.getElementById("product-list");
-      const categoryTitle = document.getElementById("category-title");
-      const emptyState = document.getElementById("empty-state");
-
-      categoryTitle.textContent = selectedCategory
+      document.getElementById("category-title").textContent = selectedCategory
         ? `Showing category: ${selectedCategory}`
         : "Showing all categories";
 
-      if (filteredAds.length === 0) {
-        productList.classList.add("hidden");
-        emptyState.classList.remove("hidden");
-      } else {
-        productList.innerHTML = filteredAds.map(ad => `
-          <a href="product.html?id=${ad.id}" class="bg-white shadow-sm hover:shadow-md rounded overflow-hidden border transition duration-200">
-            <img src="${ad.imagePreviews?.[0] || 'placeholder.jpg'}" class="w-full h-44 object-cover" alt="${ad.title}" />
-            <div class="p-3">
-              <h3 class="text-md font-semibold text-gray-800 truncate">${ad.title}</h3>
-              <p class="text-sm text-gray-500 mt-1">${ad.currency}${ad.price}</p>
-              <span class="inline-block mt-2 text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded">${ad.category}</span>
-              <div class="mt-2">
-                <p class="text-xs text-gray-400">Delivery to: ${ad.deliveryTo?.join(", ") || "N/A"}</p>
-              </div>
-            </div>
-          </a>
-        `).join("");
-      }
-    });
-  </script>
+      renderAds();
+      renderPagination();
+    }
 
+    function renderAds() {
+      const list = document.getElementById("product-list");
+      const empty = document.getElementById("empty-state");
+
+      const start = (currentPage - 1) * ITEMS_PER_PAGE;
+      const paginated = filteredAds.slice(start, start + ITEMS_PER_PAGE);
+
+      if (paginated.length === 0) {
+        list.classList.add("hidden");
+        empty.classList.remove("hidden");
+        return;
+      }
+
+      list.classList.remove("hidden");
+      empty.classList.add("hidden");
+
+      list.innerHTML = paginated.map(ad => `
+        <a href="product.html?id=${ad.id}" class="bg-white shadow-sm hover:shadow-md rounded overflow-hidden border transition duration-200">
+          <img src="${ad.images?.[0] || 'placeholder.jpg'}" class="w-full h-44 object-cover" alt="${ad.title}" />
+          <div class="p-3">
+            <h3 class="text-md font-semibold text-gray-800 truncate">${ad.title}</h3>
+            <p class="text-sm text-gray-500 mt-1">${ad.currency || '₦'}${ad.price}</p>
+            <span class="inline-block mt-2 text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded">${ad.category}</span>
+            <div class="mt-2">
+              <p class="text-xs text-gray-400">Delivery: ${ad.deliveryTime || "N/A"} days</p>
+            </div>
+          </div>
+        </a>
+      `).join("");
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredAds.length / ITEMS_PER_PAGE);
+      const pag = document.getElementById("pagination");
+      pag.innerHTML = "";
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.className = i === currentPage
+          ? "bg-purple-600 text-white px-2 py-1 rounded"
+          : "bg-gray-200 px-2 py-1 rounded";
+        btn.addEventListener("click", () => {
+          currentPage = i;
+          renderAds();
+          renderPagination();
+        });
+        pag.appendChild(btn);
+      }
+    }
+
+    document.getElementById("categoryFilter").addEventListener("change", e => {
+      const newCategory = e.target.value;
+      const url = new URL(window.location.href);
+      if (newCategory) {
+        url.searchParams.set("category", newCategory);
+      } else {
+        url.searchParams.delete("category");
+      }
+      window.history.pushState({}, "", url);
+      applyFilters();
+    });
+
+    document.addEventListener("DOMContentLoaded", fetchAds);
+  </script>
 </body>
 </html>
