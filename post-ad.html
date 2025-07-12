@@ -2,212 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Post Ad - ShopNest</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Post New Ad | ShopNest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-100 font-sans">
 
-  <!-- Header -->
-  <header class="flex justify-between items-center p-4 bg-white shadow">
-    <h1 class="text-xl font-bold text-purple-700">ShopNest</h1>
-    <a href="help.html" class="text-sm text-gray-600">Help Center</a>
-  </header>
+  <!-- Navbar -->
+  <nav class="bg-white px-4 py-3 shadow flex justify-between items-center">
+    <h1 class="text-xl font-bold text-indigo-600">ShopNest</h1>
+    <a href="dashboard.html" class="text-sm text-gray-600 hover:text-indigo-500">Dashboard</a>
+  </nav>
 
-  <main class="p-4 space-y-4">
-    <h2 class="text-lg font-semibold mb-2">Post Your Product</h2>
+  <!-- Ad Form -->
+  <main class="max-w-2xl mx-auto mt-6 p-4 bg-white shadow rounded">
+    <h2 class="text-xl font-semibold text-center mb-4">Post a New Ad</h2>
+    <form class="space-y-4">
 
-    <!-- Title -->
-    <input type="text" id="title" placeholder="Product Title" class="w-full border p-2 rounded" />
+      <input id="title" placeholder="Ad Title" class="w-full border p-2 rounded" required />
 
-    <!-- Price & Currency -->
-    <div class="flex space-x-2">
-      <input type="number" id="price" placeholder="Price" class="flex-1 border p-2 rounded" />
-      <select id="currency" class="border p-2 rounded">
-        <option value="₦">₦ NGN</option>
-        <option value="$">$ USD</option>
+      <div class="flex gap-2">
+        <input id="price" type="number" placeholder="Price" class="w-full border p-2 rounded" required />
+        <select id="currency" class="border p-2 rounded" required>
+          <option value="₦">₦ (NGN)</option>
+          <option value="$">$ (USD)</option>
+        </select>
+      </div>
+
+      <select id="category" class="w-full border p-2 rounded" required>
+        <option value="">Select Category</option>
+        <option value="Fashion">Fashion</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Automobile">Automobile</option>
+        <option value="Phones & Tablets">Phones & Tablets</option>
+        <option value="Computing">Computing</option>
+        <option value="Services">Services</option>
+        <option value="Home & Furniture">Home & Furniture</option>
+        <option value="Health & Beauty">Health & Beauty</option>
+        <option value="Baby, Kids & Toys">Baby, Kids & Toys</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Sports & Outdoors">Sports & Outdoors</option>
+        <option value="Groceries">Groceries</option>
+        <option value="Books & Media">Books & Media</option>
+        <option value="Pet Supplies">Pet Supplies</option>
+        <option value="Agriculture">Agriculture</option>
+        <option value="Industrial Equipment">Industrial Equipment</option>
+        <option value="Musical Instruments">Musical Instruments</option>
+        <option value="Watches & Jewelry">Watches & Jewelry</option>
+        <option value="Security & Surveillance">Security & Surveillance</option>
+        <option value="Food & Drink">Food & Drink</option>
+        <option value="Office Equipment">Office Equipment</option>
+        <option value="Power & Energy">Power & Energy</option>
+        <option value="Travel & Luggage">Travel & Luggage</option>
+        <option value="Arts & Crafts">Arts & Crafts</option>
+        <option value="Tickets & Events">Tickets & Events</option>
+        <option value="Education">Education</option>
+        <option value="Machinery">Machinery</option>
+        <option value="Other">Other</option>
       </select>
-    </div>
 
-    <!-- Category Dropdown -->
-    <select id="category" class="w-full border p-2 rounded">
-      <option disabled selected>Select Category</option>
-      <option value="Fashion">Fashion</option>
-      <option value="Electronics">Electronics</option>
-      <option value="Real Estate">Real Estate</option>
-      <option value="Machinery">Machinery</option>
-      <option value="Phones & Tablets">Phones & Tablets</option>
-      <option value="Vehicles">Vehicles</option>
-      <option value="Beauty">Beauty</option>
-      <option value="Baby Products">Baby Products</option>
-      <option value="Sports">Sports</option>
-      <option value="Agriculture">Agriculture</option>
-      <option value="Food">Food</option>
-      <option value="Furniture">Furniture</option>
-      <option value="Toys">Toys</option>
-      <option value="Pets">Pets</option>
-      <option value="Books">Books</option>
-      <option value="Construction">Construction</option>
-      <option value="Health">Health</option>
-      <option value="Stationery">Stationery</option>
-      <option value="Gaming">Gaming</option>
-      <option value="Watches">Watches</option>
-      <option value="Bags">Bags</option>
-      <option value="Shoes">Shoes</option>
-      <option value="Computers">Computers</option>
-      <option value="Cameras">Cameras</option>
-      <option value="Industrial">Industrial Equipment</option>
-      <option value="Others">Others</option>
-    </select>
+      <textarea id="description" placeholder="Ad Description" rows="3" class="w-full border p-2 rounded" required></textarea>
 
-    <!-- Image Upload -->
-    <input type="file" id="images" accept="image/*" multiple class="w-full border p-2 rounded" />
+      <!-- Sub Options -->
+      <div id="extra-fields" class="space-y-2"></div>
 
-    <!-- Description -->
-    <textarea id="description" placeholder="Product Description" class="w-full border p-2 rounded h-28"></textarea>
+      <!-- Delivery Options -->
+      <label class="block font-medium">Delivery Time:</label>
+      <select id="delivery" class="w-full border p-2 rounded" multiple>
+        <option value="1 day">1 day</option>
+        <option value="2-3 days">2-3 days</option>
+        <option value="1 week">1 week</option>
+        <option value="2+ weeks">2+ weeks</option>
+      </select>
 
-    <!-- Dynamic Fields -->
-    <div id="category-fields" class="space-y-2"></div>
+      <!-- Image Upload -->
+      <label class="block font-medium">Upload Images (Max 5):</label>
+      <input type="file" id="images" accept="image/*" multiple class="w-full border p-2 rounded" />
+      <div id="image-preview" class="flex gap-2 mt-2 flex-wrap"></div>
 
-    <!-- Delivery Time -->
-    <label class="block">Delivery Time (days)</label>
-    <select id="delivery-time" class="w-full border p-2 rounded">
-      <option value="3">3 Days</option>
-      <option value="7">7 Days</option>
-      <option value="14">14 Days</option>
-      <option value="30">30 Days</option>
-    </select>
+      <!-- Status Message -->
+      <p id="statusMessage" class="text-center text-sm mt-2"></p>
 
-    <!-- Delivery Countries -->
-    <label class="block mt-2">Deliverable Countries</label>
-    <textarea id="delivery-countries" placeholder="e.g. Nigeria, Ghana, Kenya" class="w-full border p-2 rounded h-20"></textarea>
-
-    <!-- Submit Button -->
-    <button onclick="submitAd()" class="w-full bg-purple-700 text-white py-2 rounded mt-4 hover:bg-purple-800">
-      Submit Ad
-    </button>
-
-    <!-- 🟡 Status Message -->
-    <p id="statusMessage" class="text-center text-sm mt-4"></p>
+      <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+        Submit Ad
+      </button>
+    </form>
   </main>
 
-  <script>
-    const categorySelect = document.getElementById('category');
-    const categoryFieldsDiv = document.getElementById('category-fields');
-    const messageBox = document.getElementById('statusMessage');
-
-    const extraFields = {
-      "Fashion": [
-        { id: "color", label: "Color" },
-        { id: "size", label: "Size" },
-        { id: "gender", label: "Gender", type: "select", options: ["Male", "Female", "Unisex"] }
-      ],
-      "Electronics": [
-        { id: "brand", label: "Brand" },
-        { id: "condition", label: "Condition", type: "select", options: ["New", "Used", "Refurbished"] },
-        { id: "warranty", label: "Warranty Period" }
-      ],
-      "Vehicles": [
-        { id: "model", label: "Model" },
-        { id: "mileage", label: "Mileage" },
-        { id: "transmission", label: "Transmission", type: "select", options: ["Manual", "Automatic"] },
-        { id: "fuel", label: "Fuel Type", type: "select", options: ["Petrol", "Diesel", "Electric"] }
-      ],
-      "Real Estate": [
-        { id: "propertyType", label: "Property Type", type: "select", options: ["House", "Flat", "Land", "Shop"] },
-        { id: "location", label: "Location" },
-        { id: "bedrooms", label: "Bedrooms" },
-        { id: "bathrooms", label: "Bathrooms" }
-      ]
-    };
-
-    categorySelect.addEventListener('change', () => {
-      const selected = categorySelect.value;
-      categoryFieldsDiv.innerHTML = '';
-
-      if (extraFields[selected]) {
-        extraFields[selected].forEach(field => {
-          if (field.type === "select") {
-            const select = document.createElement("select");
-            select.id = field.id;
-            select.className = "w-full border p-2 rounded";
-            field.options.forEach(opt => {
-              const o = document.createElement("option");
-              o.value = o.textContent = opt;
-              select.appendChild(o);
-            });
-            categoryFieldsDiv.appendChild(labelElement(field.label));
-            categoryFieldsDiv.appendChild(select);
-          } else {
-            const input = document.createElement("input");
-            input.type = "text";
-            input.id = field.id;
-            input.placeholder = field.label;
-            input.className = "w-full border p-2 rounded";
-            categoryFieldsDiv.appendChild(input);
-          }
-        });
-      }
-    });
-
-    function labelElement(text) {
-      const label = document.createElement("label");
-      label.textContent = text;
-      label.className = "block mt-2";
-      return label;
-    }
-
-    async function submitAd() {
-      messageBox.textContent = "";
-      messageBox.className = "";
-
-      const formData = new FormData();
-      formData.append("title", document.getElementById("title").value);
-      formData.append("price", document.getElementById("price").value);
-      formData.append("currency", document.getElementById("currency").value);
-      formData.append("category", document.getElementById("category").value);
-      formData.append("description", document.getElementById("description").value);
-      formData.append("deliveryTime", document.getElementById("delivery-time").value);
-      formData.append("deliveryCountries", document.getElementById("delivery-countries").value);
-
-      const selected = categorySelect.value;
-      if (extraFields[selected]) {
-        extraFields[selected].forEach(field => {
-          const value = document.getElementById(field.id)?.value;
-          if (value) {
-            formData.append(field.id, value);
-          }
-        });
-      }
-
-      const images = document.getElementById("images").files;
-      if (images.length > 5) {
-        messageBox.textContent = "⚠️ You can only upload up to 5 images.";
-        messageBox.className = "text-red-600 text-center mt-2";
-        return;
-      }
-      [...images].forEach((file) => formData.append("images", file));
-
-      try {
-        const res = await fetch("https://shopnest-backend-43fu.onrender.com/api/post-ad", {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await res.json();
-        if (res.ok) {
-          messageBox.textContent = "✅ Ad submitted successfully!";
-          messageBox.className = "text-green-600 text-center mt-2";
-          setTimeout(() => window.location.href = "dashboard.html", 1000);
-        } else {
-          messageBox.textContent = result.message || "❌ Something went wrong.";
-          messageBox.className = "text-red-600 text-center mt-2";
-        }
-      } catch (err) {
-        messageBox.textContent = "❌ Error connecting to server.";
-        messageBox.className = "text-red-600 text-center mt-2";
-      }
-    }
-  </script>
+  <!-- Script -->
+  <script type="module" src="js/post-ad.js"></script>
 </body>
 </html>
