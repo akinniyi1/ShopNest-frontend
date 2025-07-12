@@ -6,9 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const imagePreview = document.getElementById("image-preview");
   const messageBox = document.getElementById("statusMessage");
 
-  const backendURL = "https://shopnest-backend-43fu.onrender.com"; // ✅ Use /api/ads
+  const backendURL = "https://shopnest-backend-43fu.onrender.com";
 
-  // 🖼️ Image preview
+  // 🖼️ Image preview (max 5)
   imageInput.addEventListener("change", () => {
     imagePreview.innerHTML = "";
     [...imageInput.files].slice(0, 5).forEach(file => {
@@ -19,13 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 🎯 Show dynamic sub-fields
+  // 🎯 Show sub-fields based on selected category
   categorySelect.addEventListener("change", () => {
     const cat = categorySelect.value;
     extraFields.innerHTML = "";
 
-    if (cat === "Fashion") {
-      extraFields.innerHTML = `
+    const common = {
+      Fashion: `
         <input name="Brand" placeholder="Brand" class="w-full border p-2 rounded" />
         <input name="Size" placeholder="Size (e.g. M, L, XL)" class="w-full border p-2 rounded" />
         <input name="Color" placeholder="Color" class="w-full border p-2 rounded" />
@@ -35,15 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <option>Female</option>
           <option>Unisex</option>
         </select>
-      `;
-    } else if (cat === "Electronics") {
-      extraFields.innerHTML = `
+      `,
+      Electronics: `
         <input name="Brand" placeholder="Brand" class="w-full border p-2 rounded" />
         <input name="Model" placeholder="Model" class="w-full border p-2 rounded" />
         <input name="Warranty" placeholder="Warranty (e.g. 1 Year)" class="w-full border p-2 rounded" />
-      `;
-    } else if (cat === "Real Estate") {
-      extraFields.innerHTML = `
+      `,
+      "Real Estate": `
         <input name="Property Type" placeholder="Property Type (e.g. Apartment)" class="w-full border p-2 rounded" />
         <input name="Rooms" placeholder="No. of Rooms" class="w-full border p-2 rounded" />
         <select name="Furnishing" class="w-full border p-2 rounded">
@@ -52,11 +50,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <option>Semi-Furnished</option>
           <option>Unfurnished</option>
         </select>
-      `;
-    }
+      `
+    };
+
+    extraFields.innerHTML = common[cat] || "";
   });
 
-  // 📝 Submit ad
+  // 📝 Handle form submit
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     messageBox.textContent = "";
@@ -77,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const delivery = [...document.getElementById("delivery").selectedOptions].map(opt => opt.value);
     const images = [...imageInput.files].slice(0, 5);
 
+    // Sub-options
     const extraInputs = [...extraFields.querySelectorAll("input, select")];
     const subOptions = {};
     extraInputs.forEach(input => {
@@ -85,9 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    const imageBase64List = await Promise.all(
-      images.map(file => toBase64(file))
-    );
+    // Convert images to base64
+    const imageBase64List = await Promise.all(images.map(file => toBase64(file)));
 
     const newAd = {
       userEmail: user.email,
@@ -97,13 +97,13 @@ document.addEventListener("DOMContentLoaded", () => {
       currency,
       category,
       subOptions,
-      location: user.country,
-      deliveryTime: delivery.join(', '),
+      location: user.country || "Not set",
+      deliveryTime: delivery.join(", "),
       images: imageBase64List
     };
 
     try {
-      const res = await fetch(`${backendURL}/api/ads`, { // ✅ Fixed endpoint
+      const res = await fetch(`${backendURL}/api/standalone-post-ad`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAd)
@@ -116,16 +116,16 @@ document.addEventListener("DOMContentLoaded", () => {
         form.reset();
         imagePreview.innerHTML = "";
       } else {
-        messageBox.textContent = data.error || "❌ Failed to post ad.";
+        messageBox.textContent = data.error || "Failed to post ad.";
         messageBox.className = "text-red-600 text-center mt-3";
       }
     } catch (err) {
-      console.error(err);
-      messageBox.textContent = "❌ Server error. Please try again.";
+      messageBox.textContent = "Server error. Please try again.";
       messageBox.className = "text-red-600 text-center mt-3";
     }
   });
 
+  // Convert file to base64
   function toBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
