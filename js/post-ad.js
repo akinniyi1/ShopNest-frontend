@@ -6,9 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const imagePreview = document.getElementById("image-preview");
   const messageBox = document.getElementById("statusMessage");
 
-  const backendURL = "https://shopnest-backend-43fu.onrender.com";
+  const backendURL = "https://shopnest-backend-43fu.onrender.com"; // ✅ Use /api/ads
 
-  // 🖼️ Image preview for max 5
+  // 🖼️ Image preview
   imageInput.addEventListener("change", () => {
     imagePreview.innerHTML = "";
     [...imageInput.files].slice(0, 5).forEach(file => {
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 🎯 Show sub-fields based on selected category
+  // 🎯 Show dynamic sub-fields
   categorySelect.addEventListener("change", () => {
     const cat = categorySelect.value;
     extraFields.innerHTML = "";
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 📝 Handle form submit
+  // 📝 Submit ad
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     messageBox.textContent = "";
@@ -77,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const delivery = [...document.getElementById("delivery").selectedOptions].map(opt => opt.value);
     const images = [...imageInput.files].slice(0, 5);
 
-    // 🚀 Extract sub-options
     const extraInputs = [...extraFields.querySelectorAll("input, select")];
     const subOptions = {};
     extraInputs.forEach(input => {
@@ -86,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 🔃 Convert images to Base64
     const imageBase64List = await Promise.all(
       images.map(file => toBase64(file))
     );
@@ -105,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const res = await fetch(`${backendURL}/api/ads`, {
+      const res = await fetch(`${backendURL}/api/ads`, { // ✅ Fixed endpoint
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAd)
@@ -118,16 +116,16 @@ document.addEventListener("DOMContentLoaded", () => {
         form.reset();
         imagePreview.innerHTML = "";
       } else {
-        messageBox.textContent = data.error || "Failed to post ad.";
+        messageBox.textContent = data.error || "❌ Failed to post ad.";
         messageBox.className = "text-red-600 text-center mt-3";
       }
     } catch (err) {
-      messageBox.textContent = "Server error. Please try again.";
+      console.error(err);
+      messageBox.textContent = "❌ Server error. Please try again.";
       messageBox.className = "text-red-600 text-center mt-3";
     }
   });
 
-  // Helper: Convert file to base64
   function toBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
