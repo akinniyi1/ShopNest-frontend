@@ -6,7 +6,10 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyBx_2_7aqxU5z6sLbbBp0fpdJvOzjarmGE",
     authDomain: "shopnest-4cbdf.firebaseapp.com",
@@ -20,12 +23,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
+  // ✅ Supabase Config
+  const supabase = createClient(
+    "https://oryydgfrezvhfqdkhjsx.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
+  );
+
   const form = document.getElementById("registerForm");
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
   const countrySelect = document.getElementById("country");
 
-  // Error display
   const errorMessage = document.createElement("p");
   errorMessage.className = "text-red-600 text-sm mt-2 text-center";
   form.appendChild(errorMessage);
@@ -50,17 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
       await sendEmailVerification(userCred.user);
 
-      // ✅ Send registration info to backend
-      const response = await fetch("https://shopnest-backend-43fu.onrender.com/api/users/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, country, name: email.split('@')[0] }) // default name from email
-      });
+      // ✅ Save user info to Supabase
+      const name = email.split("@")[0];
+      const { error } = await supabase.from("users").insert([
+        { email, country, name, plan: "free", trialPosts: 0 }
+      ]);
 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error || "Backend registration failed.");
-      }
+      if (error) throw new Error("Could not save user to database.");
 
       alert("A verification link has been sent to your email.");
       await signOut(auth);
