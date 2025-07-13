@@ -5,6 +5,15 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+// ✅ Supabase config
+const supabase = createClient(
+  "https://oryydgfrezvhfqdkhjsx.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
+);
+
+// ✅ Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBx_2_7aqxU5z6sLbbBp0fpdJvOzjarmGE",
   authDomain: "shopnest-4cbdf.firebaseapp.com",
@@ -22,7 +31,6 @@ const form = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 
-// Create error display
 const errorMessage = document.createElement("p");
 errorMessage.className = "text-red-600 text-sm mt-2 text-center";
 form.appendChild(errorMessage);
@@ -49,18 +57,18 @@ form.addEventListener("submit", async (e) => {
       await signOut(auth);
       errorMessage.textContent = "Please verify your email before logging in.";
     } else {
-      // ✅ Get user info from backend
-      const res = await fetch(`https://shopnest-backend-43fu.onrender.com/api/users/${email}`);
-      const userData = await res.json();
+      // ✅ Fetch user info from Supabase
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("email", email)
+        .single();
 
-      if (!res.ok || !userData.email) {
-        throw new Error("Could not fetch user data from backend.");
+      if (error || !data) {
+        throw new Error("Could not fetch user info.");
       }
 
-      // Store user data in localStorage for use across pages
-      localStorage.setItem("shopnestUser", JSON.stringify(userData));
-
-      // Redirect to homepage
+      localStorage.setItem("shopnestUser", JSON.stringify(data));
       window.location.href = "index.html";
     }
   } catch (err) {
