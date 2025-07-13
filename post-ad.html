@@ -5,6 +5,8 @@
   <title>Post New Ad | ShopNest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.6/dist/imagekit.min.js"></script>
 </head>
 <body class="bg-gray-100 font-sans">
 
@@ -17,7 +19,7 @@
   <!-- Ad Form -->
   <main class="max-w-2xl mx-auto mt-6 p-4 bg-white shadow rounded">
     <h2 class="text-xl font-semibold text-center mb-4">Post a New Ad</h2>
-    <form class="space-y-4">
+    <form id="postAdForm" class="space-y-4">
 
       <input id="title" placeholder="Ad Title" class="w-full border p-2 rounded" required />
 
