@@ -5,6 +5,9 @@
   <title>Edit Ad | ShopNest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase & ImageKit -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-50 text-gray-900">
   <nav class="bg-white shadow px-4 py-3 flex justify-between items-center">
@@ -67,7 +70,11 @@
   </main>
 
   <script>
-    const backendURL = "https://shopnest-backend-43fu.onrender.com";
+    const supabase = supabase.createClient(
+      "https://oryydgfrezvhfqdkhjsx.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
+    );
+
     const urlParams = new URLSearchParams(window.location.search);
     const adId = urlParams.get("id");
 
@@ -102,7 +109,7 @@
         `;
       } else if (category === "Real Estate") {
         extraFields.innerHTML = `
-          <input name="Property Type" placeholder="Property Type (e.g. Apartment)" class="w-full border p-2 rounded" value="${subOptions['Property Type'] || ""}" />
+          <input name="Property Type" placeholder="Property Type" class="w-full border p-2 rounded" value="${subOptions['Property Type'] || ""}" />
           <input name="Rooms" placeholder="No. of Rooms" class="w-full border p-2 rounded" value="${subOptions.Rooms || ""}" />
           <select name="Furnishing" class="w-full border p-2 rounded">
             <option disabled ${!subOptions.Furnishing ? "selected" : ""}>Furnishing</option>
@@ -125,38 +132,27 @@
         return;
       }
 
-      try {
-        const res = await fetch(`${backendURL}/api/ads`);
-        const ads = await res.json();
-        const ad = ads.find(a => a.id === adId);
-
-        if (!ad) {
-          statusMsg.textContent = "Ad not found.";
-          statusMsg.className = "text-red-600 text-center";
-          return;
-        }
-
-        titleInput.value = ad.title;
-        priceInput.value = ad.price;
-        locationInput.value = ad.location;
-        deliveryInput.value = ad.deliveryTime;
-        categoryInput.value = ad.category;
-        showSubOptions(ad.category, ad.subOptions || {});
-      } catch (err) {
-        statusMsg.textContent = "Error loading ad data.";
+      const { data, error } = await supabase.from("ads").select("*").eq("id", adId).single();
+      if (error || !data) {
+        statusMsg.textContent = "Ad not found or error loading.";
         statusMsg.className = "text-red-600 text-center";
-        console.error(err);
+        return;
       }
+
+      titleInput.value = data.title;
+      priceInput.value = data.price;
+      locationInput.value = data.location;
+      deliveryInput.value = data.deliveryTime;
+      categoryInput.value = data.category;
+      showSubOptions(data.category, data.subOptions || {});
     }
 
     document.getElementById("editAdForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       statusMsg.textContent = "";
-      statusMsg.className = "";
 
-      const extraInputs = [...extraFields.querySelectorAll("input, select")];
       const subOptions = {};
-      extraInputs.forEach(input => {
+      [...extraFields.querySelectorAll("input, select")].forEach(input => {
         if (input.name && input.value) {
           subOptions[input.name] = input.value;
         }
@@ -171,26 +167,14 @@
         subOptions
       };
 
-      try {
-        const res = await fetch(`${backendURL}/api/ads/${adId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedAd)
-        });
-
-        const result = await res.json();
-        if (res.ok) {
-          statusMsg.textContent = "✅ Ad updated successfully!";
-          statusMsg.className = "text-green-600 text-center";
-          setTimeout(() => window.location.href = "dashboard.html", 1000);
-        } else {
-          statusMsg.textContent = result.error || "❌ Failed to update ad.";
-          statusMsg.className = "text-red-600 text-center";
-        }
-      } catch (err) {
-        console.error(err);
-        statusMsg.textContent = "❌ An error occurred while updating the ad.";
+      const { error } = await supabase.from("ads").update(updatedAd).eq("id", adId);
+      if (error) {
+        statusMsg.textContent = "❌ Failed to update ad.";
         statusMsg.className = "text-red-600 text-center";
+      } else {
+        statusMsg.textContent = "✅ Ad updated successfully!";
+        statusMsg.className = "text-green-600 text-center";
+        setTimeout(() => window.location.href = "dashboard.html", 1000);
       }
     });
 
