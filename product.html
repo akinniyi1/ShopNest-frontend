@@ -50,8 +50,14 @@
     &copy; 2025 ShopNest. All rights reserved.
   </footer>
 
-  <script>
-    const API_URL = 'https://shopnest-backend-43fu.onrender.com/api/ads';
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const supabase = createClient(
+      'https://oryydgfrezvhfqdkhjsx.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y'
+    );
+
     const ITEMS_PER_PAGE = 8;
     let allAds = [];
     let filteredAds = [];
@@ -59,11 +65,13 @@
 
     async function fetchAds() {
       try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        allAds = data.reverse(); // Latest first
+        const { data, error } = await supabase.from("ads").select("*").order("id", { ascending: false });
+
+        if (error) throw error;
+        allAds = data || [];
         applyFilters();
       } catch (err) {
+        console.error("Error loading ads:", err.message);
         document.getElementById("product-list").innerHTML = "<p>Error loading ads.</p>";
       }
     }
@@ -102,10 +110,10 @@
 
       list.innerHTML = paginated.map(ad => `
         <a href="product.html?id=${ad.id}" class="bg-white shadow-sm hover:shadow-md rounded overflow-hidden border transition duration-200">
-          <img src="${ad.images?.[0] || 'placeholder.jpg'}" class="w-full h-44 object-cover" alt="${ad.title}" />
+          <img src="${ad.images?.[0] || 'https://via.placeholder.com/300x200'}" class="w-full h-44 object-cover" alt="${ad.title}" />
           <div class="p-3">
             <h3 class="text-md font-semibold text-gray-800 truncate">${ad.title}</h3>
-            <p class="text-sm text-gray-500 mt-1">${ad.currency || '₦'}${ad.price}</p>
+            <p class="text-sm text-gray-500 mt-1">${ad.currency === 'USD' ? '$' : '₦'}${ad.price}</p>
             <span class="inline-block mt-2 text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded">${ad.category}</span>
             <div class="mt-2">
               <p class="text-xs text-gray-400">Delivery: ${ad.deliveryTime || "N/A"} days</p>
