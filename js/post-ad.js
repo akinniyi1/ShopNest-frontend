@@ -1,14 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form");
+  const form = document.getElementById("postAdForm");
   const categorySelect = document.getElementById("category");
   const extraFields = document.getElementById("extra-fields");
   const imageInput = document.getElementById("images");
   const imagePreview = document.getElementById("image-preview");
   const messageBox = document.getElementById("statusMessage");
 
-  const backendURL = "https://shopnest-backend-43fu.onrender.com";
+  // ✅ Supabase config
+  const supabase = supabase.createClient(
+    "https://oryydgfrezvhfqdkhjsx.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
+  );
 
-  // 🖼️ Image preview (max 5)
+  // ✅ ImageKit config
+  const imagekit = new ImageKit({
+    publicKey: "public_Yp8vUzpIsqZaLYWMveEgVPK9csU=",
+    urlEndpoint: "https://ik.imagekit.io/oqa3n7tsh"
+  });
+
+  // 🖼️ Preview selected images
   imageInput.addEventListener("change", () => {
     imagePreview.innerHTML = "";
     [...imageInput.files].slice(0, 5).forEach(file => {
@@ -19,12 +29,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 🎯 Show sub-fields based on selected category
+  // 🎯 Dynamic sub-options per category
   categorySelect.addEventListener("change", () => {
     const cat = categorySelect.value;
     extraFields.innerHTML = "";
 
-    const common = {
+    const templates = {
       Fashion: `
         <input name="Brand" placeholder="Brand" class="w-full border p-2 rounded" />
         <input name="Size" placeholder="Size (e.g. M, L, XL)" class="w-full border p-2 rounded" />
@@ -53,17 +63,34 @@ document.addEventListener("DOMContentLoaded", () => {
       `
     };
 
-    extraFields.innerHTML = common[cat] || "";
+    extraFields.innerHTML = templates[cat] || "";
   });
 
-  // 📝 Handle form submit
+  // 📤 Upload image to ImageKit
+  async function uploadToImageKit(file) {
+    return new Promise((resolve, reject) => {
+      imagekit.upload({
+        file,
+        fileName: `shopnest_${Date.now()}_${file.name}`
+      }, (err, result) => {
+        if (err) {
+          console.error("ImageKit Error:", err);
+          reject(err);
+        } else {
+          resolve(result.url);
+        }
+      });
+    });
+  }
+
+  // 📝 Submit ad form
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     messageBox.textContent = "";
     messageBox.className = "";
 
     const user = JSON.parse(localStorage.getItem("shopnestUser"));
-    if (!user || !user.email) {
+    if (!user?.email) {
       messageBox.textContent = "Please login first.";
       messageBox.className = "text-red-600 text-center mt-3";
       return;
@@ -75,63 +102,54 @@ document.addEventListener("DOMContentLoaded", () => {
     const category = categorySelect.value;
     const description = document.getElementById("description").value.trim();
     const delivery = [...document.getElementById("delivery").selectedOptions].map(opt => opt.value);
-    const images = [...imageInput.files].slice(0, 5);
+    const location = user.country || "Not set";
+    const files = [...imageInput.files].slice(0, 5);
 
-    // Sub-options
-    const extraInputs = [...extraFields.querySelectorAll("input, select")];
+    if (!title || !price || !category || !description || !files.length) {
+      messageBox.textContent = "Please fill all required fields and upload at least 1 image.";
+      messageBox.className = "text-red-600 text-center mt-3";
+      return;
+    }
+
+    const subInputs = [...extraFields.querySelectorAll("input, select")];
     const subOptions = {};
-    extraInputs.forEach(input => {
+    subInputs.forEach(input => {
       if (input.name && input.value) {
         subOptions[input.name] = input.value;
       }
     });
 
-    // Convert images to base64
-    const imageBase64List = await Promise.all(images.map(file => toBase64(file)));
-
-    const newAd = {
-      userEmail: user.email,
-      title,
-      description,
-      price,
-      currency,
-      category,
-      subOptions,
-      location: user.country || "Not set",
-      deliveryTime: delivery.join(", "),
-      images: imageBase64List
-    };
-
     try {
-      const res = await fetch(`${backendURL}/api/standalone-post-ad`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newAd)
-      });
+      messageBox.textContent = "Uploading images...";
+      const imageURLs = await Promise.all(files.map(uploadToImageKit));
 
-      const data = await res.json();
-      if (res.ok) {
+      const { data, error } = await supabase.from("ads").insert([{
+        user_email: user.email,
+        title,
+        description,
+        price,
+        category,
+        sub_options: subOptions,
+        location,
+        delivery_time: delivery.join(", "),
+        images: imageURLs,
+        status: "active"
+      }]);
+
+      if (error) {
+        console.error(error);
+        messageBox.textContent = "❌ Failed to post ad.";
+        messageBox.className = "text-red-600 text-center mt-3";
+      } else {
         messageBox.textContent = "✅ Ad posted successfully!";
         messageBox.className = "text-green-600 text-center mt-3";
         form.reset();
         imagePreview.innerHTML = "";
-      } else {
-        messageBox.textContent = data.error || "Failed to post ad.";
-        messageBox.className = "text-red-600 text-center mt-3";
       }
     } catch (err) {
-      messageBox.textContent = "Server error. Please try again.";
+      console.error(err);
+      messageBox.textContent = "⚠️ Upload failed. Please try again.";
       messageBox.className = "text-red-600 text-center mt-3";
     }
   });
-
-  // Convert file to base64
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject("Error reading file");
-      reader.readAsDataURL(file);
-    });
-  }
 });
