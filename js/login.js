@@ -1,9 +1,8 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-const supabase = createClient(
-  "https://oryydgfrezvhfqdkhjsx.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
-);
+const supabaseUrl = 'https://oryydgfrezvhfqdkhjsx.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // keep secure
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const form = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
@@ -15,7 +14,6 @@ form.appendChild(errorMessage);
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
 
@@ -34,18 +32,17 @@ form.addEventListener("submit", async (e) => {
   if (error) {
     errorMessage.textContent = error.message || "Login failed.";
   } else {
-    // Load user info from database
     const { data: userInfo } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
       .single();
 
-    if (!userInfo) {
-      errorMessage.textContent = "User not found in database.";
-    } else {
+    if (userInfo) {
       localStorage.setItem("shopnestUser", JSON.stringify(userInfo));
       window.location.href = "index.html";
+    } else {
+      errorMessage.textContent = "User data not found.";
     }
   }
 
