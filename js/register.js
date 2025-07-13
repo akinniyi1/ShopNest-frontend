@@ -1,7 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
+// ✅ Your Supabase project credentials
 const supabaseUrl = 'https://oryydgfrezvhfqdkhjsx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // keep secure
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -31,17 +32,31 @@ document.addEventListener("DOMContentLoaded", () => {
     submitBtn.disabled = true;
     errorMessage.textContent = "";
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    try {
+      // ✅ Create account in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    if (error) {
-      errorMessage.textContent = error.message;
-    } else {
-      await supabase.from("users").insert([{ email, name, country, plan: "trial" }]);
-      alert("Check your email for verification.");
+      if (authError) {
+        throw new Error(authError.message);
+      }
+
+      // ✅ Save user info in `users` table
+      const { error: insertError } = await supabase.from("users").insert([
+        { email, name, country, plan: "trial" }
+      ]);
+
+      if (insertError) {
+        throw new Error("Could not save user to database.");
+      }
+
+      alert("Account created! Check your email for a verification link.");
       window.location.href = "login.html";
+
+    } catch (err) {
+      errorMessage.textContent = err.message || "Something went wrong.";
     }
 
     submitBtn.textContent = "Register";
