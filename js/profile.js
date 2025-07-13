@@ -5,6 +5,9 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+// ✅ Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBx_2_7aqxU5z6sLbbBp0fpdJvOzjarmGE",
   authDomain: "shopnest-4cbdf.firebaseapp.com",
@@ -17,8 +20,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const BACKEND_URL = "https://shopnest-backend-43fu.onrender.com";
 
+// ✅ Supabase config
+const supabase = createClient(
+  "https://oryydgfrezvhfqdkhjsx.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
+);
+
+// 🔎 DOM elements
 const usernameEl = document.getElementById("username");
 const emailEl = document.getElementById("email");
 const planEl = document.getElementById("plan");
@@ -33,34 +42,41 @@ onAuthStateChanged(auth, async (user) => {
   emailEl.textContent = user.email;
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/users/${user.email}`);
-    const userData = await res.json();
+    // 🔁 Get user data from Supabase
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", user.email)
+      .single();
 
-    usernameEl.textContent = userData.name || "N/A";
+    if (error || !data) throw new Error("User not found");
 
-    if (userData.plan === "premium") {
+    usernameEl.textContent = data.name || "N/A";
+
+    if (data.plan === "premium") {
       planEl.textContent = "Premium Plan";
-      planEl.className = "inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium";
+      planEl.className =
+        "inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium";
       upgradeBtn.style.display = "none";
     } else {
       planEl.textContent = "Free Plan";
-      planEl.className = "inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium";
+      planEl.className =
+        "inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium";
+
       upgradeBtn.addEventListener("click", async () => {
         upgradeBtn.textContent = "Upgrading...";
         upgradeBtn.disabled = true;
 
-        const res = await fetch(`${BACKEND_URL}/api/users/upgrade`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: user.email, plan: "premium" })
-        });
+        const { error: upgradeError } = await supabase
+          .from("users")
+          .update({ plan: "premium" })
+          .eq("email", user.email);
 
-        const result = await res.json();
-        if (result.success) {
+        if (upgradeError) {
+          alert("Upgrade failed. Try again.");
+        } else {
           alert("Successfully upgraded to Premium!");
           location.reload();
-        } else {
-          alert("Upgrade failed. Try again.");
         }
 
         upgradeBtn.textContent = "Upgrade to Premium";
@@ -68,7 +84,7 @@ onAuthStateChanged(auth, async (user) => {
       });
     }
   } catch (err) {
-    console.error("Failed to load profile:", err);
+    console.error("Failed to load profile:", err.message);
     usernameEl.textContent = "Error loading data";
   }
 });
