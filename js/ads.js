@@ -1,5 +1,13 @@
-const backendURL = "https://shopnest-backend-43fu.onrender.com/api/ads";
+const SUPABASE_URL = "https://oryydgfrezvhfqdkhjsx.supabase.co";
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y";
+const adsEndpoint = `${SUPABASE_URL}/rest/v1/ads`;
 const adsPerPage = 6;
+
+const headers = {
+  apikey: SUPABASE_KEY,
+  Authorization: `Bearer ${SUPABASE_KEY}`,
+};
 
 let allAds = [];
 let currentPage = 1;
@@ -25,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAds();
       }
     });
+
     nextBtn.addEventListener("click", () => {
       const totalPages = Math.ceil(filteredAds().length / adsPerPage);
       if (currentPage < totalPages) {
@@ -37,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadAds() {
   try {
-    const res = await fetch(backendURL);
+    const res = await fetch(`${adsEndpoint}?select=*`, { headers });
     if (!res.ok) throw new Error("Failed to fetch ads");
     allAds = await res.json();
   } catch (err) {
