@@ -1,14 +1,15 @@
-const SUPABASE_URL = "https://oryydgfrezvhfqdkhjsx.supabase.co";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y";
-const adsEndpoint = `${SUPABASE_URL}/rest/v1/ads`;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const adsPerPage = 6;
-
-const headers = {
-  apikey: SUPABASE_KEY,
-  Authorization: `Bearer ${SUPABASE_KEY}`,
-};
-
 let allAds = [];
 let currentPage = 1;
 
@@ -46,12 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadAds() {
   try {
-    const res = await fetch(`${adsEndpoint}?select=*`, { headers });
-    if (!res.ok) throw new Error("Failed to fetch ads");
-    allAds = await res.json();
+    const adsSnapshot = await getDocs(collection(db, "ads"));
+    allAds = adsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
     console.error("Error loading ads:", err.message);
-    allAds = seedDummyAds();
+    allAds = [];
   }
   renderAds();
 }
@@ -82,9 +82,9 @@ function renderAds() {
     const div = document.createElement("div");
     div.className = "bg-white p-3 rounded shadow";
 
-    const image = (Array.isArray(ad.images) && ad.images.length > 0)
+    const image = Array.isArray(ad.images) && ad.images.length > 0
       ? ad.images[0]
-      : ad.image || "https://via.placeholder.com/300x200";
+      : "https://via.placeholder.com/300x200";
 
     const currencySymbol = ad.currency === "USD" ? "$" : "₦";
 
@@ -102,49 +102,4 @@ function renderAds() {
   if (pageInfo) {
     pageInfo.textContent = `Page ${currentPage} of ${Math.ceil(ads.length / adsPerPage)}`;
   }
-}
-
-function seedDummyAds() {
-  return [
-    {
-      title: "Laptop with SSD",
-      price: 200000,
-      currency: "NGN",
-      location: "Lagos, Nigeria",
-      category: "Electronics",
-      plan: "premium",
-      deliveryTime: 7,
-      images: ["https://via.placeholder.com/300x200"]
-    },
-    {
-      title: "Trendy Apparel",
-      price: 120000,
-      currency: "NGN",
-      location: "Abuja, Nigeria",
-      category: "Fashion",
-      plan: "free",
-      deliveryTime: 5,
-      images: ["https://via.placeholder.com/300x200"]
-    },
-    {
-      title: "3 Bedroom Villa",
-      price: 45000000,
-      currency: "NGN",
-      location: "Port Harcourt, Nigeria",
-      category: "Real Estate",
-      plan: "premium",
-      deliveryTime: 14,
-      images: ["https://via.placeholder.com/300x200"]
-    },
-    {
-      title: "Wheel Loader",
-      price: 25000,
-      currency: "USD",
-      location: "Kano, Nigeria",
-      category: "Machinery",
-      plan: "premium",
-      deliveryTime: 10,
-      images: ["https://via.placeholder.com/300x200"]
-    }
-  ];
 }
