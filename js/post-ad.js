@@ -1,3 +1,10 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("form");
   const categorySelect = document.getElementById("category");
@@ -125,14 +132,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      // 🔥 Save to Firestore
-      await firebase.firestore().collection("ads").add(newAd);
-
+      await addDoc(collection(db, "ads"), newAd);
       messageBox.textContent = "✅ Ad posted successfully!";
       messageBox.className = "text-green-600 text-center mt-3";
       form.reset();
       imagePreview.innerHTML = "";
     } catch (err) {
+      console.error(err);
       messageBox.textContent = "❌ Failed to save ad.";
       messageBox.className = "text-red-600 text-center mt-3";
     }
