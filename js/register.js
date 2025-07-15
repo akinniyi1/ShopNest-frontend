@@ -7,6 +7,7 @@ import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
+  const usernameInput = document.getElementById("username");
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
   const countrySelect = document.getElementById("country");
@@ -26,12 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const name = usernameInput.value.trim();
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
     const country = countrySelect.value;
-    const name = email.split("@")[0];
 
-    if (!email || !password || !country) {
+    if (!name || !email || !password || !country) {
       errorMessage.textContent = "Please fill all fields.";
       return;
     }
@@ -76,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toast.classList.remove("hidden");
     setTimeout(() => {
       toast.classList.remove("opacity-0");
-    }, 100); // slight delay for transition effect
+    }, 100);
 
     setTimeout(() => {
       toast.classList.add("opacity-0");
