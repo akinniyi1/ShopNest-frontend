@@ -1,11 +1,12 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db } from "./firebase-config.js";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {
+  doc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
     const country = countrySelect.value;
@@ -35,27 +37,27 @@ document.addEventListener("DOMContentLoaded", () => {
     errorMessage.textContent = "";
 
     try {
-      // 🔐 Create user in Firebase Auth
+      // 🔐 Create user account
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 📩 Send email verification
+      // 📧 Send verification
       await sendEmailVerification(user);
 
-      // 💾 Save user profile in Firestore
+      // 📄 Save user data in Firestore
       await setDoc(doc(db, "users", user.uid), {
         email,
         name,
         country,
-        plan: "trial",
+        plan: "trial"
       });
 
-      // ✅ Redirect after success
+      // ✅ Success
       alert("Account created! Please check your email to verify your account.");
       window.location.href = "login.html";
 
     } catch (err) {
-      console.error(err);
+      console.error("Registration error:", err);
       if (err.code === "auth/email-already-in-use") {
         errorMessage.textContent = "Account already exists. Please login.";
       } else {
