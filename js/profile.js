@@ -7,19 +7,17 @@ const emailEl = document.getElementById("email");
 const planEl = document.getElementById("plan");
 const upgradeBtn = document.querySelector("button");
 
-// ✅ Check if user is logged in
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  const email = user.email;
-  emailEl.textContent = email;
+  emailEl.textContent = user.email;
 
   try {
-    // 📄 Load user info from Firestore
-    const userRef = doc(db, "users", email);
+    // ✅ Use UID instead of email for document ID
+    const userRef = doc(db, "users", user.uid);
     const docSnap = await getDoc(userRef);
 
     if (!docSnap.exists()) {
