@@ -5,8 +5,20 @@
   <title>Reset Password — ShopNest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .toast {
+      @apply fixed top-5 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow text-sm transition-opacity duration-300;
+      z-index: 9999;
+    }
+    .fade-out {
+      opacity: 0;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans relative">
+
+  <!-- Toast Message -->
+  <div id="toast" class="toast hidden"></div>
 
   <div class="min-h-screen flex items-center justify-center px-4">
     <div class="bg-white p-6 rounded shadow-md w-full max-w-sm text-center">
@@ -20,8 +32,7 @@
         Reset Password
       </button>
 
-      <p id="resetMessage" class="text-sm mt-4 text-gray-600"></p>
-      <a href="index.html" class="text-indigo-600 text-sm block mt-4">← Back to Login</a>
+      <a href="login.html" class="text-indigo-600 text-sm block mt-4">← Back to Login</a>
     </div>
   </div>
 
@@ -44,32 +55,41 @@
 
     const resetBtn = document.getElementById("resetBtn");
     const resetEmail = document.getElementById("resetEmail");
-    const resetMessage = document.getElementById("resetMessage");
+    const toast = document.getElementById("toast");
 
     resetBtn.onclick = async () => {
       const email = resetEmail.value.trim();
-      if (!email) {
-        resetMessage.textContent = "Please enter your email address.";
-        return;
-      }
+      if (!email) return showToast("Please enter your email address.", "error");
 
       resetBtn.textContent = "Sending...";
       resetBtn.disabled = true;
 
       try {
         await sendPasswordResetEmail(auth, email);
-        resetMessage.textContent = "Password reset link sent to your email.";
+        showToast("✅ Reset link sent! Redirecting to login...", "success");
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 5000);
       } catch (err) {
         if (err.code === "auth/invalid-email" || err.code === "auth/user-not-found") {
-          resetMessage.textContent = "Account doesn't exist";
+          showToast("Account doesn't exist.", "error");
         } else {
-          resetMessage.textContent = "Error: " + (err.message || "Something went wrong.");
+          showToast("Error: " + (err.message || "Something went wrong."), "error");
         }
       }
 
       resetBtn.textContent = "Reset Password";
       resetBtn.disabled = false;
     };
+
+    function showToast(message, type) {
+      toast.textContent = message;
+      toast.className = `toast ${type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`;
+      toast.classList.remove("hidden", "fade-out");
+
+      setTimeout(() => toast.classList.add("fade-out"), 3000);
+      setTimeout(() => toast.classList.add("hidden"), 3500);
+    }
   </script>
 </body>
 </html>
