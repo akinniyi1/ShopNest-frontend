@@ -1,11 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db } from "./firebase-config.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
@@ -43,9 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-
+      const docSnap = await getDoc(doc(db, "users", user.uid));
       if (!docSnap.exists()) {
         errorMessage.textContent = "User profile not found.";
         loginBtn.textContent = "Login";
@@ -53,13 +46,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const userData = docSnap.data();
-      localStorage.setItem("shopnestUser", JSON.stringify(userData));
-
+      localStorage.setItem("shopnestUser", JSON.stringify(docSnap.data()));
       window.location.href = "index.html";
+
     } catch (err) {
-      console.error(err);
-      errorMessage.textContent = "Incorrect email or password.";
+      console.error("Login error:", err);
+      if (err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+        errorMessage.textContent = "Incorrect email or password.";
+      } else {
+        errorMessage.textContent = err.message;
+      }
     }
 
     loginBtn.textContent = "Login";
