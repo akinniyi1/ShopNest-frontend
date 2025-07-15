@@ -1,39 +1,41 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-const supabaseUrl = 'https://oryydgfrezvhfqdkhjsx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // your anon key
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// 🔐 Check auth session
-supabase.auth.getSession().then(async ({ data: { session } }) => {
-  if (!session) {
+// 🔐 Check auth session and load user
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
     window.location.href = "login.html";
-  } else {
-    const email = session.user.email;
-    const { data: userInfo } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .single();
+    return;
+  }
 
-    if (userInfo) {
+  try {
+    const userRef = doc(db, "users", user.email);
+    const docSnap = await getDoc(userRef);
+
+    if (docSnap.exists()) {
+      const userInfo = docSnap.data();
       localStorage.setItem("shopnestUser", JSON.stringify(userInfo));
     }
-
-    const main = document.getElementById("mainContent");
-    if (main) main.classList.remove("hidden");
-
-    import("./ads.js").catch(err =>
-      console.error("❌ Failed to load ads.js:", err)
-    );
+  } catch (err) {
+    console.error("❌ Failed to fetch user info:", err.message);
   }
+
+  // 👁️ Show main content
+  const main = document.getElementById("mainContent");
+  if (main) main.classList.remove("hidden");
+
+  // ⬇️ Load ads
+  import("./ads.js").catch(err =>
+    console.error("❌ Failed to load ads.js:", err)
+  );
 });
 
 // 🔓 Logout
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
     window.location.href = "login.html";
   });
 }
