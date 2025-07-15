@@ -16,8 +16,7 @@ onAuthStateChanged(auth, async (user) => {
   emailEl.textContent = user.email;
 
   try {
-    // ✅ Use UID instead of email for document ID
-    const userRef = doc(db, "users", user.uid);
+    const userRef = doc(db, "users", user.uid); // ✅ fixed here
     const docSnap = await getDoc(userRef);
 
     if (!docSnap.exists()) {
