@@ -5,9 +5,6 @@
   <title>Edit Ad | ShopNest</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Supabase & ImageKit -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-50 text-gray-900">
   <nav class="bg-white shadow px-4 py-3 flex justify-between items-center">
@@ -69,11 +66,13 @@
     </form>
   </main>
 
-  <script>
-    const supabase = supabase.createClient(
-      "https://oryydgfrezvhfqdkhjsx.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
-    );
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    import { firebaseConfig } from "./js/firebase-config.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     const urlParams = new URLSearchParams(window.location.search);
     const adId = urlParams.get("id");
@@ -132,12 +131,16 @@
         return;
       }
 
-      const { data, error } = await supabase.from("ads").select("*").eq("id", adId).single();
-      if (error || !data) {
-        statusMsg.textContent = "Ad not found or error loading.";
+      const docRef = doc(db, "ads", adId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        statusMsg.textContent = "Ad not found.";
         statusMsg.className = "text-red-600 text-center";
         return;
       }
+
+      const data = docSnap.data();
 
       titleInput.value = data.title;
       priceInput.value = data.price;
@@ -167,14 +170,16 @@
         subOptions
       };
 
-      const { error } = await supabase.from("ads").update(updatedAd).eq("id", adId);
-      if (error) {
-        statusMsg.textContent = "❌ Failed to update ad.";
-        statusMsg.className = "text-red-600 text-center";
-      } else {
+      try {
+        const docRef = doc(db, "ads", adId);
+        await updateDoc(docRef, updatedAd);
         statusMsg.textContent = "✅ Ad updated successfully!";
         statusMsg.className = "text-green-600 text-center";
-        setTimeout(() => window.location.href = "dashboard.html", 1000);
+        setTimeout(() => window.location.href = "dashboard.html", 1200);
+      } catch (err) {
+        console.error(err);
+        statusMsg.textContent = "❌ Failed to update ad.";
+        statusMsg.className = "text-red-600 text-center";
       }
     });
 
