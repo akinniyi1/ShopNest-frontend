@@ -1,10 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
-
-// ✅ Your Supabase project credentials
-const supabaseUrl = 'https://oryydgfrezvhfqdkhjsx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
   const emailInput = document.getElementById("email");
@@ -33,30 +26,32 @@ document.addEventListener("DOMContentLoaded", () => {
     errorMessage.textContent = "";
 
     try {
-      // ✅ Create account in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // 🔐 Create account in Firebase Auth
+      const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+
+      // 📩 Send email verification
+      await user.sendEmailVerification();
+
+      // 📄 Save user profile in Firestore
+      await firebase.firestore().collection("users").doc(user.uid).set({
         email,
-        password,
+        name,
+        country,
+        plan: "trial",
       });
 
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      // ✅ Save user info in `users` table
-      const { error: insertError } = await supabase.from("users").insert([
-        { email, name, country, plan: "trial" }
-      ]);
-
-      if (insertError) {
-        throw new Error("Could not save user to database.");
-      }
-
-      alert("Account created! Check your email for a verification link.");
+      // ✅ Redirect
+      alert("Account created! Please check your email to verify your account.");
       window.location.href = "login.html";
 
     } catch (err) {
-      errorMessage.textContent = err.message || "Something went wrong.";
+      console.error(err);
+      if (err.code === "auth/email-already-in-use") {
+        errorMessage.textContent = "Account already exists. Please login.";
+      } else {
+        errorMessage.textContent = err.message || "Something went wrong.";
+      }
     }
 
     submitBtn.textContent = "Register";
