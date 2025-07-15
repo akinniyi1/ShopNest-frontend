@@ -1,12 +1,6 @@
 import { auth, db } from "./firebase-config.js";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import {
-  doc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
@@ -37,27 +31,22 @@ document.addEventListener("DOMContentLoaded", () => {
     errorMessage.textContent = "";
 
     try {
-      // 🔐 Create user account
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 📧 Send verification
       await sendEmailVerification(user);
 
-      // 📄 Save user data in Firestore
       await setDoc(doc(db, "users", user.uid), {
         email,
         name,
         country,
-        plan: "trial"
+        plan: "trial",
       });
 
-      // ✅ Success
-      alert("Account created! Please check your email to verify your account.");
+      alert("✅ Account created. Please verify your email.");
       window.location.href = "login.html";
-
     } catch (err) {
-      console.error("Registration error:", err);
+      console.error(err);
       if (err.code === "auth/email-already-in-use") {
         errorMessage.textContent = "Account already exists. Please login.";
       } else {
