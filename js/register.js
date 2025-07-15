@@ -1,3 +1,12 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
   const emailInput = document.getElementById("email");
@@ -26,22 +35,22 @@ document.addEventListener("DOMContentLoaded", () => {
     errorMessage.textContent = "";
 
     try {
-      // 🔐 Create account in Firebase Auth
-      const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      // 🔐 Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
       // 📩 Send email verification
-      await user.sendEmailVerification();
+      await sendEmailVerification(user);
 
-      // 📄 Save user profile in Firestore
-      await firebase.firestore().collection("users").doc(user.uid).set({
+      // 💾 Save user profile in Firestore
+      await setDoc(doc(db, "users", user.uid), {
         email,
         name,
         country,
         plan: "trial",
       });
 
-      // ✅ Redirect
+      // ✅ Redirect after success
       alert("Account created! Please check your email to verify your account.");
       window.location.href = "login.html";
 
