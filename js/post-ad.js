@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const imagePreview = document.getElementById("image-preview");
   const messageBox = document.getElementById("statusMessage");
 
-  const backendURL = "https://shopnest-backend-43fu.onrender.com";
+  const imgbbApiKey = "f85ea26f2ede140972a8845b5219f32d";
 
   // 🖼️ Image preview for max 5
   imageInput.addEventListener("change", () => {
@@ -86,11 +86,30 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 🔃 Convert images to Base64
-    const imageBase64List = await Promise.all(
-      images.map(file => toBase64(file))
-    );
+    // 🖼️ Upload images to imgbb
+    let uploadedImageUrls = [];
+    try {
+      for (const img of images) {
+        const formData = new FormData();
+        formData.append("image", img);
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success) {
+          uploadedImageUrls.push(data.data.url);
+        } else {
+          throw new Error("Image upload failed");
+        }
+      }
+    } catch (uploadErr) {
+      messageBox.textContent = "❌ Image upload failed.";
+      messageBox.className = "text-red-600 text-center mt-3";
+      return;
+    }
 
+    // 📦 Prepare ad object for Firebase
     const newAd = {
       userEmail: user.email,
       title,
@@ -101,39 +120,21 @@ document.addEventListener("DOMContentLoaded", () => {
       subOptions,
       location: user.country,
       deliveryTime: delivery.join(', '),
-      images: imageBase64List
+      images: uploadedImageUrls,
+      createdAt: new Date().toISOString()
     };
 
     try {
-      const res = await fetch(`${backendURL}/api/ads`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newAd)
-      });
+      // 🔥 Save to Firestore
+      await firebase.firestore().collection("ads").add(newAd);
 
-      const data = await res.json();
-      if (res.ok) {
-        messageBox.textContent = "✅ Ad posted successfully!";
-        messageBox.className = "text-green-600 text-center mt-3";
-        form.reset();
-        imagePreview.innerHTML = "";
-      } else {
-        messageBox.textContent = data.error || "Failed to post ad.";
-        messageBox.className = "text-red-600 text-center mt-3";
-      }
+      messageBox.textContent = "✅ Ad posted successfully!";
+      messageBox.className = "text-green-600 text-center mt-3";
+      form.reset();
+      imagePreview.innerHTML = "";
     } catch (err) {
-      messageBox.textContent = "Server error. Please try again.";
+      messageBox.textContent = "❌ Failed to save ad.";
       messageBox.className = "text-red-600 text-center mt-3";
     }
   });
-
-  // Helper: Convert file to base64
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject("Error reading file");
-      reader.readAsDataURL(file);
-    });
-  }
 });
