@@ -1,26 +1,45 @@
 import { auth } from "./firebase-config.js";
-import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-document.getElementById("resetForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = document.getElementById("resetEmail").value.trim();
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("resetForm");
+  const emailInput = document.getElementById("resetEmail");
   const messageBox = document.getElementById("statusMessage");
 
-  messageBox.textContent = "";
-  messageBox.className = "";
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
 
-  if (!email) {
-    messageBox.textContent = "Please enter your email address.";
-    messageBox.className = "text-red-600 text-sm text-center mt-2";
-    return;
-  }
+    messageBox.textContent = "";
+    messageBox.className = "";
 
-  try {
-    await sendPasswordResetEmail(auth, email);
-    messageBox.textContent = "✅ Reset link sent to your email.";
-    messageBox.className = "text-green-600 text-sm text-center mt-2";
-  } catch (error) {
-    messageBox.textContent = error.message || "Failed to send reset link.";
-    messageBox.className = "text-red-600 text-sm text-center mt-2";
+    if (!email) {
+      showMessage("Please enter your email address.", "error");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMessage("✅ Reset link sent to your email. Redirecting to login...", "success");
+
+      // Redirect after 5 seconds
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 5000);
+    } catch (error) {
+      console.error("Reset error:", error);
+      if (error.code === "auth/user-not-found") {
+        showMessage("No account found with that email.", "error");
+      } else {
+        showMessage(error.message || "Failed to send reset link.", "error");
+      }
+    }
+  });
+
+  function showMessage(message, type) {
+    messageBox.textContent = message;
+    messageBox.className = `text-sm text-center mt-3 ${
+      type === "success" ? "text-green-600 bg-green-100 py-2 rounded" : "text-red-600 bg-red-100 py-2 rounded"
+    }`;
   }
 });
