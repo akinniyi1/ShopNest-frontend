@@ -1,8 +1,15 @@
-// Firebase config should already be imported in firebase-config.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const imgbbApiKey = "f85ea26f2ede140972a8845b5219f32d";
 
 const params = new URLSearchParams(window.location.search);
 const adId = params.get("id");
+
 const form = document.getElementById("editAdForm");
 const imageInput = document.getElementById("images");
 const imagePreview = document.getElementById("image-preview");
@@ -11,13 +18,15 @@ const messageBox = document.getElementById("statusMessage");
 // 🧠 Load ad details from Firestore
 async function loadAd() {
   try {
-    const adRef = await firebase.firestore().collection("ads").doc(adId).get();
-    if (!adRef.exists) {
+    const adRef = doc(db, "ads", adId);
+    const adSnap = await getDoc(adRef);
+
+    if (!adSnap.exists()) {
       messageBox.textContent = "❌ Ad not found.";
       return;
     }
 
-    const data = adRef.data();
+    const data = adSnap.data();
     document.getElementById("title").value = data.title;
     document.getElementById("price").value = data.price;
     document.getElementById("description").value = data.description;
@@ -30,7 +39,7 @@ async function loadAd() {
 
     form.dataset.existingImages = JSON.stringify(data.images || []);
   } catch (error) {
-    console.error(error);
+    console.error("Error loading ad:", error);
     messageBox.textContent = "❌ Failed to load ad.";
   }
 }
@@ -49,6 +58,7 @@ form.addEventListener("submit", async (e) => {
   const files = [...imageInput.files].slice(0, 5);
   let images = JSON.parse(form.dataset.existingImages);
 
+  // Upload new images if any
   if (files.length > 0) {
     try {
       const uploaded = await Promise.all(files.map(async (file) => {
@@ -67,19 +77,25 @@ form.addEventListener("submit", async (e) => {
       }));
       images = uploaded;
     } catch (err) {
-      console.error("Image upload error", err);
+      console.error("Image upload error:", err);
       messageBox.textContent = "❌ Failed to upload images.";
       return;
     }
   }
 
+  // Update Firestore document
   try {
-    await firebase.firestore().collection("ads").doc(adId).update({
-      title, price, description, category, images
+    const adRef = doc(db, "ads", adId);
+    await updateDoc(adRef, {
+      title,
+      price,
+      description,
+      category,
+      images
     });
     messageBox.textContent = "✅ Ad updated successfully!";
   } catch (error) {
-    console.error(error);
+    console.error("Update error:", error);
     messageBox.textContent = "❌ Failed to update ad.";
   }
 });
