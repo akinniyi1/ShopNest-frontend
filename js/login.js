@@ -1,3 +1,12 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 const form = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -23,8 +32,7 @@ form.addEventListener("submit", async (e) => {
   errorMessage.textContent = "";
 
   try {
-    // 🔐 Firebase Authentication
-    const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
     if (!user.emailVerified) {
@@ -34,19 +42,18 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    // ✅ Fetch user profile from Firestore "users" collection
-    const doc = await firebase.firestore().collection("users").doc(user.uid).get();
-    if (!doc.exists) {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (!userDoc.exists()) {
       errorMessage.textContent = "Could not load user info. Try again.";
       loginBtn.textContent = "Login";
       loginBtn.disabled = false;
       return;
     }
 
-    const userData = doc.data();
+    const userData = userDoc.data();
     localStorage.setItem("shopnestUser", JSON.stringify(userData));
 
-    // Redirect
+    // ✅ Redirect after successful login
     window.location.href = "index.html";
 
   } catch (err) {
