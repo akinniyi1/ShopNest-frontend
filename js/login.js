@@ -51,10 +51,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       console.error("Login error:", err);
-      if (err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+      if (
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/user-not-found" ||
+        err.code === "auth/invalid-credential"
+      ) {
         errorMessage.textContent = "Incorrect email or password.";
       } else {
-        errorMessage.textContent = err.message;
+        errorMessage.textContent = err.message || "An error occurred.";
       }
     }
 
