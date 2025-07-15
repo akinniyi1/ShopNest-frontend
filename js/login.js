@@ -1,9 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
-
-const supabaseUrl = 'https://oryydgfrezvhfqdkhjsx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 const form = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -29,48 +23,40 @@ form.addEventListener("submit", async (e) => {
   errorMessage.textContent = "";
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // 🔐 Firebase Authentication
+    const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
 
-    if (error) {
-      if (error.message.toLowerCase().includes("invalid login credentials")) {
-        errorMessage.textContent = "Incorrect email or password.";
-      } else {
-        errorMessage.textContent = error.message;
-      }
-      return;
-    }
-
-    const { user } = data;
-    if (!user?.email_confirmed_at) {
+    if (!user.emailVerified) {
       errorMessage.textContent = "Please verify your email before logging in.";
+      loginBtn.textContent = "Login";
+      loginBtn.disabled = false;
       return;
     }
 
-    // ✅ Fetch user profile from users table
-    const { data: userData, error: fetchError } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .single();
-
-    if (fetchError || !userData) {
+    // ✅ Fetch user profile from Firestore "users" collection
+    const doc = await firebase.firestore().collection("users").doc(user.uid).get();
+    if (!doc.exists) {
       errorMessage.textContent = "Could not load user info. Try again.";
+      loginBtn.textContent = "Login";
+      loginBtn.disabled = false;
       return;
     }
 
-    // Store user info in localStorage
+    const userData = doc.data();
     localStorage.setItem("shopnestUser", JSON.stringify(userData));
 
-    // Redirect to homepage
+    // Redirect
     window.location.href = "index.html";
+
   } catch (err) {
     console.error("Login error:", err);
-    errorMessage.textContent = "Error: " + (err.message || "Something went wrong.");
+    if (err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+      errorMessage.textContent = "Incorrect email or password. Please try again.";
+    } else {
+      errorMessage.textContent = err.message;
+    }
+    loginBtn.textContent = "Login";
+    loginBtn.disabled = false;
   }
-
-  loginBtn.textContent = "Login";
-  loginBtn.disabled = false;
 });
