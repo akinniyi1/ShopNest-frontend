@@ -1,32 +1,33 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
-
-const supabaseUrl = 'https://oryydgfrezvhfqdkhjsx.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // your anon key
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { auth, db } from "./firebase-config.js";
+import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 const usernameEl = document.getElementById("username");
 const emailEl = document.getElementById("email");
 const planEl = document.getElementById("plan");
 const upgradeBtn = document.querySelector("button");
 
-supabase.auth.getSession().then(async ({ data: { session } }) => {
-  if (!session) {
+// ✅ Check if user is logged in
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  const email = session.user.email;
+  const email = user.email;
   emailEl.textContent = email;
 
   try {
-    const { data: userInfo, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .single();
+    // 📄 Load user info from Firestore
+    const userRef = doc(db, "users", email);
+    const docSnap = await getDoc(userRef);
 
-    if (error || !userInfo) throw error;
+    if (!docSnap.exists()) {
+      usernameEl.textContent = "User not found";
+      return;
+    }
 
+    const userInfo = docSnap.data();
     usernameEl.textContent = userInfo.name || "N/A";
 
     if (userInfo.plan === "premium") {
@@ -41,15 +42,12 @@ supabase.auth.getSession().then(async ({ data: { session } }) => {
         upgradeBtn.textContent = "Upgrading...";
         upgradeBtn.disabled = true;
 
-        const { error: upgradeError } = await supabase
-          .from("users")
-          .update({ plan: "premium" })
-          .eq("email", email);
-
-        if (!upgradeError) {
+        try {
+          await updateDoc(userRef, { plan: "premium" });
           alert("Successfully upgraded to Premium!");
           location.reload();
-        } else {
+        } catch (upgradeError) {
+          console.error("Upgrade failed:", upgradeError.message);
           alert("Upgrade failed.");
         }
 
