@@ -12,10 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageInput = document.getElementById("images");
   const imagePreview = document.getElementById("image-preview");
   const messageBox = document.getElementById("statusMessage");
-
   const imgbbApiKey = "f85ea26f2ede140972a8845b5219f32d";
 
-  // 🖼️ Image preview for max 5
+  // 🖼️ Image preview (max 5)
   imageInput.addEventListener("change", () => {
     imagePreview.innerHTML = "";
     [...imageInput.files].slice(0, 5).forEach(file => {
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 🎯 Show sub-fields based on selected category
+  // 🎯 Dynamic sub-fields by category
   categorySelect.addEventListener("change", () => {
     const cat = categorySelect.value;
     extraFields.innerHTML = "";
@@ -63,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 📝 Handle form submit
+  // 📝 Form submit handler
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     messageBox.textContent = "";
@@ -71,8 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const user = JSON.parse(localStorage.getItem("shopnestUser"));
     if (!user || !user.email) {
-      messageBox.textContent = "Please login first.";
-      messageBox.className = "text-red-600 text-center mt-3";
+      showError("Please login first.");
       return;
     }
 
@@ -84,7 +82,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const delivery = [...document.getElementById("delivery").selectedOptions].map(opt => opt.value);
     const images = [...imageInput.files].slice(0, 5);
 
-    // 🚀 Extract sub-options
+    if (!title || !description || !category || isNaN(price)) {
+      showError("Please fill all required fields correctly.");
+      return;
+    }
+
+    // 🚀 Sub-options
     const extraInputs = [...extraFields.querySelectorAll("input, select")];
     const subOptions = {};
     extraInputs.forEach(input => {
@@ -93,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 🖼️ Upload images to imgbb
+    // 🖼️ Upload to imgbb
     let uploadedImageUrls = [];
     try {
       for (const img of images) {
@@ -110,13 +113,12 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error("Image upload failed");
         }
       }
-    } catch (uploadErr) {
-      messageBox.textContent = "❌ Image upload failed.";
-      messageBox.className = "text-red-600 text-center mt-3";
+    } catch (err) {
+      showError("❌ Image upload failed.");
       return;
     }
 
-    // 📦 Prepare ad object for Firebase
+    // 📦 Create ad object
     const newAd = {
       userEmail: user.email,
       title,
@@ -131,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       createdAt: new Date().toISOString()
     };
 
+    // 🧾 Save to Firestore
     try {
       await addDoc(collection(db, "ads"), newAd);
       messageBox.textContent = "✅ Ad posted successfully!";
@@ -138,9 +141,14 @@ document.addEventListener("DOMContentLoaded", () => {
       form.reset();
       imagePreview.innerHTML = "";
     } catch (err) {
-      console.error(err);
-      messageBox.textContent = "❌ Failed to save ad.";
-      messageBox.className = "text-red-600 text-center mt-3";
+      console.error("Firestore error:", err);
+      showError("❌ Failed to save ad.");
     }
   });
+
+  function showError(message) {
+    messageBox.textContent = message;
+    messageBox.className = "text-red-600 text-center mt-3";
+    messageBox.scrollIntoView({ behavior: "smooth" });
+  }
 });
