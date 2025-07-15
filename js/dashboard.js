@@ -1,11 +1,5 @@
 const container = document.getElementById("myAdsContainer");
 
-// ✅ Supabase Config
-const supabase = supabase.createClient(
-  "https://oryydgfrezvhfqdkhjsx.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXlkZ2ZyZXp2aGZxZGtoanN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0MzA5NjMsImV4cCI6MjA2ODAwNjk2M30.KMsr_RYFZaldt_hMfkHh2Qn-Mq5fIjk5Beb8cQQmt8Y"
-);
-
 // ✅ Check if logged in
 const user = JSON.parse(localStorage.getItem("shopnestUser"));
 
@@ -15,26 +9,24 @@ if (!user || !user.email) {
   loadUserAds();
 }
 
+// ✅ Load User Ads from Firestore
 async function loadUserAds() {
   try {
-    const { data: ads, error } = await supabase
-      .from("ads")
-      .select("*")
-      .eq("user_email", user.email);
+    const snapshot = await firebase.firestore()
+      .collection("ads")
+      .where("userEmail", "==", user.email)
+      .get();
 
-    if (error) {
-      console.error(error);
-      container.innerHTML = "<p class='text-red-500'>Error loading ads.</p>";
-      return;
-    }
-
-    if (!ads || ads.length === 0) {
+    if (snapshot.empty) {
       container.innerHTML = "<p class='text-gray-500'>You have not posted any ads yet.</p>";
       return;
     }
 
     container.innerHTML = "";
-    ads.forEach(ad => {
+    snapshot.forEach(doc => {
+      const ad = doc.data();
+      const adId = doc.id;
+
       const div = document.createElement("div");
       div.className = "bg-white shadow rounded-lg p-4 relative";
 
@@ -44,30 +36,25 @@ async function loadUserAds() {
         <h3 class="text-lg font-semibold text-gray-800">${ad.title}</h3>
         <p class="text-gray-600 font-medium mb-1">${ad.currency || "₦"}${ad.price}</p>
         <p class="text-sm text-gray-500">📍 ${ad.location} • ${ad.category}</p>
-        <p class="text-sm text-gray-400">Delivery: ${ad.delivery_time || "N/A"}</p>
+        <p class="text-sm text-gray-400">Delivery: ${ad.deliveryTime || "N/A"}</p>
         <div class="mt-3 flex gap-3">
-          <a href="edit-ad.html?id=${ad.id}" class="text-blue-600 text-sm font-medium">✏️ Edit</a>
-          <button class="text-red-600 text-sm font-medium" data-id="${ad.id}">🗑️ Delete</button>
+          <a href="edit-ad.html?id=${adId}" class="text-blue-600 text-sm font-medium">✏️ Edit</a>
+          <button class="text-red-600 text-sm font-medium" data-id="${adId}">🗑️ Delete</button>
         </div>
       `;
 
-      // Delete handler
+      // ❌ Handle Delete
       div.querySelector("button").addEventListener("click", async (e) => {
         const confirmDelete = confirm("Are you sure you want to delete this ad?");
         if (!confirmDelete) return;
 
-        const adId = e.target.dataset.id;
-        const { error: deleteError } = await supabase
-          .from("ads")
-          .delete()
-          .eq("id", adId);
-
-        if (deleteError) {
-          alert("Failed to delete ad.");
-          console.error(deleteError);
-        } else {
+        try {
+          await firebase.firestore().collection("ads").doc(adId).delete();
           alert("Ad deleted successfully!");
           div.remove();
+        } catch (deleteError) {
+          alert("Failed to delete ad.");
+          console.error(deleteError);
         }
       });
 
